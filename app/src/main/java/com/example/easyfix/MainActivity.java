@@ -1,11 +1,25 @@
 package com.example.easyfix;
 
+import static android.content.ContentValues.TAG;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    EditText eTUser, eTPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -13,13 +27,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Report report = new Report();
         mAuth = FirebaseAuth.getInstance();
+        eTUser = (EditText) findViewById(R.id.eTUser);
+        eTPass = (EditText) findViewById(R.id.eTPass);
 
     }
     public void Register(View view) {
 
-            //String Email = eTUser.getText().toString();
-            //String Password = eTPass.getText().toString();
-            //System.out.println(Email + " " + Password);
+            String Email = eTUser.getText().toString();
+            String Password = eTPass.getText().toString();
+            System.out.println(Email + " " + Password);
             mAuth.createUserWithEmailAndPassword(Email, Password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
