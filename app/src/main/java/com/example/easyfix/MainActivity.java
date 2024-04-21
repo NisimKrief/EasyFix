@@ -2,6 +2,8 @@ package com.example.easyfix;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.easyfix.FBref.refOrganizations;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,17 +11,43 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private FirebaseAuth mAuth;
     EditText eTUser, eTPass;
+    String[] Mosad = {"נא לבחור מוסד: ", "הרב תחומי עמ'ל מקיף ז'", "מקיף א'", "מיקרוסופט" };
+    String[] BeforePicking = {"קודם לבחור מוסד בבקשה"};
+    String[] Class = {"נא לבחור כיתה: ", "כיתה א'","כיתה ב'", "כיתה ג'", "כיתה ד'", "כיתה ה'", "כיתה ו'", "כיתה ז'", "כיתה ח'"
+    , "כיתה ט'", "כיתה י'", "כיתה יא'", "כיתה יב'", "כיתה יג'", "כיתה יד'" };
+    String[] WorkArea = {"נא לבחור אזור עבודה: ", "משרד", "כלכלה", "תכנות"};
+    Spinner spinMosad;
+    Spinner spinClass;
+    String MosadSelected;
+    int MosadIdSelected;
+    String MosadStringId;
+    String ClassSelected;
+    int ClassIdSelected;
+    ArrayAdapter<String> AdpMosadClass;
+    ArrayAdapter<String> AdpMosadWorkArea;
+    Calendar calendar;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,19 +57,51 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         eTUser = (EditText) findViewById(R.id.eTUser);
         eTPass = (EditText) findViewById(R.id.eTPass);
+        spinMosad = (Spinner) findViewById(R.id.spinner);
+        spinClass = (Spinner) findViewById(R.id.spinner2);
+        ArrayAdapter<String> adpMosad = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Mosad);
+        ArrayAdapter<String> adpBeforePicking = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, BeforePicking);
+        AdpMosadClass = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Class);
+        AdpMosadWorkArea = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, WorkArea);
+        spinMosad.setAdapter(adpMosad);
+        spinMosad.setOnItemSelectedListener(this);
+        spinClass.setAdapter(adpBeforePicking);
+        spinClass.setOnItemSelectedListener(this);
+        calendar = Calendar.getInstance();
+
+        /* ArrayList<Building> OrganizationBuildings = new ArrayList<>();
+        Organization test = new Organization("TestMosad", "0", OrganizationBuildings);
+
+        // Add organization to Firebase Realtime Database
+        FBref.refOrganizations.child(test.getKeyId()).setValue(test).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Organization added successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Failed to add organization", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }); */
 
     }
     public void Register(View view) {
 
             String Email = eTUser.getText().toString();
             String Password = eTPass.getText().toString();
-            System.out.println(Email + " " + Password);
+            System.out.println(Email + " " + Password + " " + MosadSelected + " " + ClassSelected);
+        Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
             mAuth.createUserWithEmailAndPassword(Email, Password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                startActivity(new Intent(MainActivity.this, SecondActivity.class));
+                                FirebaseUser fUser = mAuth.getCurrentUser();
+                                String uId = fUser.getUid();
+                                User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
+                                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + user.getKeyID() + "/Users");
+                                usersRef.push().setValue(user);
+                                startActivity(new Intent(MainActivity.this, ReportsActivity.class));
                                 Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                 Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
                             } else {
@@ -51,10 +111,44 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
         }
-            Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if(parent.getId() == R.id.spinner) { // אם משתמשים בספינר של מוסד
+            if (position != -1) {
+                MosadSelected = Mosad[position];
+                MosadIdSelected = position;
+                MosadStringId = String.valueOf(position);  // String of MosadId
+                if (position <= 2) { // If its Mosad of School
+                    spinClass.setAdapter(AdpMosadClass);
+
+                } else {
+                    spinClass.setAdapter(AdpMosadWorkArea);
+                }
+
+            }
+        }
+        else{ // אם משתמשים בספניר של כיתה/אזור עבודה
+            if (position != 0){
+                if(MosadIdSelected <=2){ // אם נבחרה כיתה
+                    ClassSelected = Class[position];
+                }
+                else{
+                    ClassSelected = WorkArea[position]; // אם נבחר אזור עבודה
+                }
+                ClassIdSelected = position;
+            }
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
 
     }
 }
+
 /*
 package com.example.alphaversion;
 

@@ -2,15 +2,32 @@ package com.example.easyfix;
 
 public class User {
     String KeyId; //מספר מפתח השייך לארגון
+    String uId;
     int LastYear; //שנת סיום למידה
     int ClassNumber; // מספר כיתה / אזור עבודה
     int UserLevel; // לדוגמה עבור תלמיד 10 מורה 20.....
 
-    public User(String keyID, int lastYear, int classNumber, int userLevel) {
-        KeyId = keyID;
+
+
+    public User(String keyId, String uId, int lastYear, int classNumber) {
+        KeyId = keyId;
+        this.uId = uId;
+        LastYear = lastYear;
+        ClassNumber = classNumber;
+        UserLevel = 0;
+    }
+
+    public User(String keyId, String uId, int lastYear, int classNumber, int userLevel) {
+        KeyId = keyId;
+        this.uId = uId;
         LastYear = lastYear;
         ClassNumber = classNumber;
         UserLevel = userLevel;
+    }
+
+
+
+    public User() {
     }
 
     public String getKeyID() {
