@@ -25,13 +25,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private FirebaseAuth mAuth;
     EditText eTUser, eTPass;
     String[] Mosad = {"נא לבחור מוסד: ", "הרב תחומי עמ'ל מקיף ז'", "מקיף א'", "מיקרוסופט" };
+    ArrayList<Organization> Organizations = new ArrayList<Organization>();
+
     String[] BeforePicking = {"קודם לבחור מוסד בבקשה"};
     String[] Class = {"נא לבחור כיתה: ", "כיתה א'","כיתה ב'", "כיתה ג'", "כיתה ד'", "כיתה ה'", "כיתה ו'", "כיתה ז'", "כיתה ח'"
     , "כיתה ט'", "כיתה י'", "כיתה יא'", "כיתה יב'", "כיתה יג'", "כיתה יד'" };
@@ -63,17 +68,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayAdapter<String> adpBeforePicking = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, BeforePicking);
         AdpMosadClass = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Class);
         AdpMosadWorkArea = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, WorkArea);
-        spinMosad.setAdapter(adpMosad);
         spinMosad.setOnItemSelectedListener(this);
         spinClass.setAdapter(adpBeforePicking);
         spinClass.setOnItemSelectedListener(this);
         calendar = Calendar.getInstance();
 
-        /* ArrayList<Building> OrganizationBuildings = new ArrayList<>();
-        Organization test = new Organization("TestMosad", "0", OrganizationBuildings);
+        // הוספת כל המוסדים הקיימים לספינר של בחירת מוסדות
+        ValueEventListener orgListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dS) {
+                Organizations.clear();
+                for(DataSnapshot data : dS.getChildren()){
+                    Organization Org = data.getValue(Organization.class);
+                    Organizations.add(Org);
+                }
+                spinMosad.setAdapter(new ArrayAdapterOrganization(MainActivity.this, Organizations));
+            }
 
-        // Add organization to Firebase Realtime Database
-        FBref.refOrganizations.child(test.getKeyId()).setValue(test).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Error fetching organizations", error.toException());
+
+
+            }
+        };
+        refOrganizations.addListenerForSingleValueEvent(orgListener);
+
+        /* Add organization
+        String keyId = refOrganizations.push().getKey();
+        ArrayList<Building> OrganizationBuildings = new ArrayList<>();
+        Organization test = new Organization("TestMosad", keyId, OrganizationBuildings);
+        FBref.refOrganizations.child(keyId).setValue(test).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -96,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+
                                 FirebaseUser fUser = mAuth.getCurrentUser();
                                 String uId = fUser.getUid();
                                 User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
@@ -104,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 startActivity(new Intent(MainActivity.this, ReportsActivity.class));
                                 Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                 Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+
                             } else {
                                 Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
                                 Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
@@ -117,18 +144,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if(parent.getId() == R.id.spinner) { // אם משתמשים בספינר של מוסד
             if (position != -1) {
-                MosadSelected = Mosad[position];
+                Organization selectedOrg = Organizations.get(position);
+                MosadSelected = selectedOrg.getOrganizationName();
                 MosadIdSelected = position;
-                MosadStringId = String.valueOf(position);  // String of MosadId
+                MosadStringId = String.valueOf(selectedOrg.getKeyId());  // Assuming you have a method to get the organization ID
                 if (position <= 2) { // If its Mosad of School
                     spinClass.setAdapter(AdpMosadClass);
-
                 } else {
                     spinClass.setAdapter(AdpMosadWorkArea);
                 }
-
             }
         }
+
         else{ // אם משתמשים בספניר של כיתה/אזור עבודה
             if (position != 0){
                 if(MosadIdSelected <=2){ // אם נבחרה כיתה
