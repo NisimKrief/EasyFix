@@ -22,6 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class ReportsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    String orgKeyId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,29 +42,29 @@ public class ReportsActivity extends AppCompatActivity {
         String UserUid = FUser.getUid();
         String path = "Users/" + UserUid + "/uId"; // הגעה ישירות למיקום הuId
         Query query = refOrganizations.orderByChild(path).equalTo(UserUid);
-        query.addListenerForSingleValueEvent(valueEventListener);
-    }
-    ValueEventListener valueEventListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if(snapshot.exists()){
-                for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                    System.out.println(snapshot1);
-                    System.out.println(snapshot1.getValue());
-                    Organization org = snapshot1.getValue(Organization.class);
-                    System.out.println(org.toString());
+        //מציאת מפתח ארגון
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                        orgKeyId = snapshot1.getKey();
+                        System.out.println(orgKeyId);
+                    }
+                }
+                else{
+                    System.out.println("There's no User like that");
                 }
             }
-            else{
-                System.out.println("nah");
-                System.out.println(snapshot.getValue());
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
-        }
+        };
+        query.addListenerForSingleValueEvent(valueEventListener);
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
+    }
 
-        }
-    };
 
 }
