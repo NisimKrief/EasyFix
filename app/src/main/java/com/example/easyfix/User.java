@@ -1,11 +1,11 @@
 package com.example.easyfix;
 
 public class User {
-    String KeyId; //מספר מפתח השייך לארגון
-    String uId;
-    int LastYear; //שנת סיום למידה
-    int ClassNumber; // מספר כיתה / אזור עבודה
-    int UserLevel; // לדוגמה עבור תלמיד 10 מורה 20.....
+    private String KeyId; //מספר מפתח השייך לארגון
+    private String uId; // מספר מפתח של המשתמש
+    private int LastYear; //שנת סיום למידה
+    private int ClassNumber; // מספר כיתה / אזור עבודה
+    private int UserLevel; // לדוגמה עבור תלמיד 10 מורה 20.....
 
 
 
@@ -30,11 +30,19 @@ public class User {
     public User() {
     }
 
-    public String getKeyID() {
+    public String getKeyId() {
         return KeyId;
     }
 
-    public void setKeyID(String keyID) {
+    public String getuId() {
+        return uId;
+    }
+
+    public void setuId(String uId) {
+        this.uId = uId;
+    }
+
+    public void setKeyId(String keyID) {
         KeyId = keyID;
     }
 

@@ -1,16 +1,16 @@
 package com.example.easyfix;
 
 public class Report {
-    String reporter;
-    String ReportMainType;
-    String UrgencyLevel;
-    Integer MalfunctionArea;
-    String TimeReported;
-    String ExtraInformation;
-    String ReportPhoto;
-    String MalfunctionFixer;
-    String TimeFixed;
-    String FixedPhoto;
+    private String reporter; // The User who reported
+    private String ReportMainType; // Report Title
+    private String UrgencyLevel; // UrgencyLevel decided by technician
+    private Integer MalfunctionArea; // The Area of the problem
+    private String TimeReported; // Time Reported
+    private String ExtraInformation; // Description
+    private String ReportPhoto; // Photo
+    private String MalfunctionFixer; // Technician that Fixed the problem
+    private String TimeFixed; // Fixed Time
+    private String FixedPhoto; // Photo of the Fixed Problem
 
     public Report() {
         // בנאי ריק.

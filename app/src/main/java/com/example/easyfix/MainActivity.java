@@ -29,6 +29,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Report report = new Report();
+        //Report report = new Report();
         mAuth = FirebaseAuth.getInstance();
         eTUser = (EditText) findViewById(R.id.eTUser);
         eTPass = (EditText) findViewById(R.id.eTPass);
@@ -72,6 +73,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinClass.setAdapter(adpBeforePicking);
         spinClass.setOnItemSelectedListener(this);
         calendar = Calendar.getInstance();
+        //startActivity(new Intent(MainActivity.this, ReportsActivity.class)); דילוג לצוריך דיבאגים
+        //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "0"+ "/Reports");
+        //Long timestamp = System.currentTimeMillis();
+        //reportsRef.push().setValue(report);
+        //reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw0tcgLr8oBAxTVzwXe"+ "/Reports");
+        //timestamp = System.currentTimeMillis();
+        //reportsRef.push().setValue(report);
 
         // הוספת כל המוסדים הקיימים לספינר של בחירת מוסדות
         ValueEventListener orgListener = new ValueEventListener() {
@@ -94,7 +102,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         };
         refOrganizations.addListenerForSingleValueEvent(orgListener);
 
-        /* Add organization
+
+        /* Create A User
+        User user = new User();
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5WzzWbLlKwXcmglWm" + "/Users");
+
+        usersRef.push().setValue(user); */
+
+        /*Add organization
         String keyId = refOrganizations.push().getKey();
         ArrayList<Building> OrganizationBuildings = new ArrayList<>();
         Organization test = new Organization("TestMosad", keyId, OrganizationBuildings);
@@ -108,6 +123,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             }
         }); */
+
+        // Add Report
+        /*
+        DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5X96KI_P4yGcxoN3L" + "/Reports");
+        Report report = new Report(
+                null, // reporter
+                "Default Report", // reportMainType
+                1, // malfunctionArea (you can set this based on your requirements)
+                String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
+                "No additional information" // extraInformation
+        );
+        reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
 
     }
     public void Register(View view) {
@@ -125,8 +152,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 FirebaseUser fUser = mAuth.getCurrentUser();
                                 String uId = fUser.getUid();
                                 User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
-                                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + user.getKeyID() + "/Users");
-                                usersRef.push().setValue(user);
+                                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + user.getKeyId() + "/Users");
+
+                                System.out.println(user.getuId());
+                                usersRef.child(uId).setValue(user);
                                 startActivity(new Intent(MainActivity.this, ReportsActivity.class));
                                 Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                 Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
@@ -147,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 Organization selectedOrg = Organizations.get(position);
                 MosadSelected = selectedOrg.getOrganizationName();
                 MosadIdSelected = position;
-                MosadStringId = String.valueOf(selectedOrg.getKeyId());  // Assuming you have a method to get the organization ID
+                MosadStringId = String.valueOf(selectedOrg.getKeyId());
                 if (position <= 2) { // If its Mosad of School
                     spinClass.setAdapter(AdpMosadClass);
                 } else {
