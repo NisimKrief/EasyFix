@@ -3,9 +3,11 @@ package com.example.easyfix;
 import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,6 +27,9 @@ import com.google.firebase.auth.FirebaseUser;
 public class LogInActivity extends AppCompatActivity {
     EditText eTUser, eTPass;
     private FirebaseAuth mAuth;
+    CheckBox rememberCheckBox;
+    boolean rememberChecked;
+    SharedPreferences sP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +41,12 @@ public class LogInActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        rememberChecked = false;
         eTUser = (EditText) findViewById(R.id.eTUser2);
         eTPass = (EditText) findViewById(R.id.eTPass2);
+        rememberCheckBox = (CheckBox)findViewById(R.id.checkBox);
         mAuth = FirebaseAuth.getInstance();
-
+        sP=getSharedPreferences("Remember",MODE_PRIVATE);
 
     }
 
@@ -55,6 +62,9 @@ public class LogInActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            SharedPreferences.Editor editor=sP.edit();
+                            editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                            editor.apply();
                             startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
                             Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "signInWithEmailAndPassword:success");

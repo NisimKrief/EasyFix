@@ -9,11 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -53,12 +55,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     ArrayAdapter<String> AdpMosadClass;
     ArrayAdapter<String> AdpMosadWorkArea;
     Calendar calendar;
-
+    CheckBox rememberCheckBox;
+    SharedPreferences sP;
 
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null)
+        boolean isChecked = sP.getBoolean("doRemember", false);
+        if(currentUser != null && isChecked)
             startActivity(new Intent(MainActivity.this, ReportsActivity.class));
 
     }
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         eTPass = (EditText) findViewById(R.id.eTPass);
         spinMosad = (Spinner) findViewById(R.id.spinner);
         spinClass = (Spinner) findViewById(R.id.spinner2);
+        rememberCheckBox = (CheckBox)findViewById(R.id.checkBox2);
         //ArrayAdapter<String> adpMosad = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Mosad);
         ArrayAdapter<String> adpBeforePicking = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, BeforePicking);
         AdpMosadClass = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Class);
@@ -80,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinClass.setAdapter(adpBeforePicking);
         spinClass.setOnItemSelectedListener(this);
         calendar = Calendar.getInstance();
+        sP =getSharedPreferences("Remember",MODE_PRIVATE);
+
         //startActivity(new Intent(MainActivity.this, ReportsActivity.class)); דילוג לצוריך דיבאגים
         //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "0"+ "/Reports");
         //Long timestamp = System.currentTimeMillis();
@@ -155,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-
                                 FirebaseUser fUser = mAuth.getCurrentUser();
                                 String uId = fUser.getUid();
                                 User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
@@ -163,6 +169,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                                 System.out.println(user.getuId());
                                 usersRef.child(uId).setValue(user);
+                                SharedPreferences.Editor editor=sP.edit();
+                                editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                                editor.apply();
                                 startActivity(new Intent(MainActivity.this, ReportsActivity.class));
                                 Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                 Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
