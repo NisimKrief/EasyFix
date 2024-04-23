@@ -2,6 +2,7 @@ package com.example.easyfix;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.refOrganizations;
 
 import androidx.annotation.NonNull;
@@ -54,7 +55,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     Calendar calendar;
 
 
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null)
+            startActivity(new Intent(MainActivity.this, ReportsActivity.class));
 
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 FirebaseUser fUser = mAuth.getCurrentUser();
                                 String uId = fUser.getUid();
                                 User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
-                                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + user.getKeyId() + "/Users");
+                                DatabaseReference usersRef = FBDB.getReference("Organizations/" + user.getKeyId() + "/Users");
 
                                 System.out.println(user.getuId());
                                 usersRef.child(uId).setValue(user);
@@ -202,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    public void LogInScreen(View view) {
+        startActivity(new Intent(MainActivity.this, LogInActivity.class));
     }
 }
 
