@@ -92,7 +92,6 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         // contents of the view with that element
         viewHolder.ReportNameTv.setText(Reports.get(position).getReportMainType());
         viewHolder.ReportStatusTv.setText(Reports.get(position).getExtraInformation());
-        System.out.println(viewHolder.ReportStatusTv.getText());
 
 
         String status = Reports.get(position).getUrgencyLevel();

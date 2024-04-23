@@ -4,13 +4,23 @@ import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.refOrganizations;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -34,6 +44,9 @@ public class ReportsActivity extends AppCompatActivity {
     ArrayList<Report> Reports = new ArrayList<Report>();
     RecyclerView ReportRv;
     ReportListAdapter repListAdapter;
+    SharedPreferences sP;
+    String UserUid;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +62,11 @@ public class ReportsActivity extends AppCompatActivity {
         repListAdapter=new ReportListAdapter(Reports);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
+        sP=getSharedPreferences("Remember",MODE_PRIVATE);
 
         // יצירת רפורט רנדומלי
 
-        DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5X96KI_P4yGcxoN3L" + "/Reports");
+       /* DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5X96KI_P4yGcxoN3L" + "/Reports");
         Report report = new Report(
                 null, // reporter
                 "There's a big issue in the bathroom of class 5, when I went there I saw lots of water flooding all over the place, please fix", // reportMainType
@@ -60,11 +74,11 @@ public class ReportsActivity extends AppCompatActivity {
                 String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
                 "Please fix it as fast as possible" // extraInformation
         );
-        reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+        reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
         Report rp = new Report();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser FUser = mAuth.getCurrentUser();
-        String UserUid = FUser.getUid();
+        UserUid = FUser.getUid();
         String path = "Users/" + UserUid + "/uId"; // הגעה ישירות למיקום הuId
         Query query = refOrganizations.orderByChild(path).equalTo(UserUid);
         //מציאת מפתח ארגון
@@ -74,9 +88,8 @@ public class ReportsActivity extends AppCompatActivity {
                 if(snapshot.exists()){
                     for(DataSnapshot snapshot1 : snapshot.getChildren()){
                         orgKeyId = snapshot1.getKey();
-                        System.out.println(orgKeyId);
                         DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
-                        refReports.addListenerForSingleValueEvent(repListener);
+                        refReports.addValueEventListener(repListener);
                     }
 
                 }
@@ -92,7 +105,6 @@ public class ReportsActivity extends AppCompatActivity {
                         Report rep = data.getValue(Report.class);
                         Reports.add(rep);
                     }
-                    System.out.println(Reports);
                     ReportRv.setAdapter(repListAdapter);
                 }
 
@@ -115,4 +127,46 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
 
+    public void Logout(View view) {
+        FirebaseAuth.getInstance().signOut();
+        SharedPreferences.Editor editor=sP.edit();
+        editor.putBoolean("doRemember", false); // לעדכן שהמשתמש יצא וצריך לשמור כניסה מחדש
+        editor.apply();
+        Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
+        Toast.makeText(ReportsActivity.this, "Logout Successfully", Toast.LENGTH_SHORT).show();
+        startActivity(intent);
+    }
+
+    public void addReport(View view) {
+        ConstraintLayout successConstraintLayout = findViewById(R.id.reportDialogConstraintLayout);
+        View dialogView = LayoutInflater.from(ReportsActivity.this).inflate(R.layout.report_dialog, successConstraintLayout);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ReportsActivity.this);
+        builder.setView(dialogView);
+        final AlertDialog alertDialog = builder.create();
+
+        Button Enter = dialogView.findViewById(R.id.reportEnter);
+        EditText reportTitle = (EditText) dialogView.findViewById(R.id.repTitle);
+        EditText reportDescription = (EditText) dialogView.findViewById(R.id.repDesc);
+
+        Enter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
+                Report report = new Report(
+                        UserUid, // reporter
+                        reportTitle.getText().toString(), // reportMainType
+                        1, // malfunctionArea (you can set this based on your requirements)
+                        String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
+                        reportDescription.getText().toString() // extraInformation
+                );
+                reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+                alertDialog.dismiss();
+            }
+        });
+
+        if(alertDialog.getWindow() != null){
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+        }
+        alertDialog.show();
+    }
 }

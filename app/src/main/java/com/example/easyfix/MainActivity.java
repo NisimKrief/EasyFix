@@ -155,8 +155,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             String Email = eTUser.getText().toString();
             String Password = eTPass.getText().toString();
-            System.out.println(Email + " " + Password + " " + MosadSelected + " " + ClassSelected);
-        Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
             mAuth.createUserWithEmailAndPassword(Email, Password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -167,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
                                 DatabaseReference usersRef = FBDB.getReference("Organizations/" + user.getKeyId() + "/Users");
 
-                                System.out.println(user.getuId());
                                 usersRef.child(uId).setValue(user);
                                 SharedPreferences.Editor editor=sP.edit();
                                 editor.putBoolean("doRemember", rememberCheckBox.isChecked());
@@ -223,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void LogInScreen(View view) {
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
     }
+
 }
 
 /*

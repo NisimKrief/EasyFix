@@ -1,5 +1,4 @@
 package com.example.easyfix;
-
 public class User {
     private String KeyId; //מספר מפתח השייך לארגון
     private String uId; // מספר מפתח של המשתמש
@@ -23,6 +22,13 @@ public class User {
         LastYear = lastYear;
         ClassNumber = classNumber;
         UserLevel = userLevel;
+    }
+    public User(User user1){
+        String KeyId = user1.getKeyId();
+        String uId = user1.getuId();
+        int LastYear = user1.getLastYear();
+        int ClassNumber = user1.getClassNumber();
+        int UserLevel = user1.getUserLevel();
     }
 
 
