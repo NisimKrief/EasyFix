@@ -3,6 +3,7 @@ package com.example.easyfix;
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.refOrganizations;
+import static com.example.easyfix.FBref.refReports;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -88,7 +89,8 @@ public class ReportsActivity extends AppCompatActivity {
                 if(snapshot.exists()){
                     for(DataSnapshot snapshot1 : snapshot.getChildren()){
                         orgKeyId = snapshot1.getKey();
-                        DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
+                        //DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
+                        refReports = refReports.child(orgKeyId);
                         refReports.addValueEventListener(repListener);
                     }
 
@@ -151,7 +153,8 @@ public class ReportsActivity extends AppCompatActivity {
         Enter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
+                //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
+                DatabaseReference reportsRef = refReports;
                 Report report = new Report(
                         UserUid, // reporter
                         reportTitle.getText().toString(), // reportMainType

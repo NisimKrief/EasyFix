@@ -1,27 +1,16 @@
 package com.example.easyfix;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * The type Task list adapter.
@@ -48,7 +37,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         public ViewHolder(View view) {
             super(view);
 
-            ReportNameTv = (TextView) view.findViewById(R.id.reportNameTv);
+            ReportNameTv = (TextView) view.findViewById(R.id.reportsNameTv);
             ReportStatusTv = (TextView) view.findViewById(R.id.reportStatusTv);
             cardView = (CardView) view.findViewById(R.id.cardId);
             containerll = (LinearLayout) view.findViewById(R.id.containerLL);

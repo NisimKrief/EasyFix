@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:layout_margin="1dp"
 
-    android:id="@+id/containerLL"
+    android:id="@+id/WcontainerLL"
 
     android:layout_height="wrap_content">
     <androidx.cardview.widget.CardView
@@ -30,18 +30,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Report Name"
-                    android:textStyle="bold"
+                    android:text="User Name"
+                    android:textStyle="italic"
                     android:textColor="@color/black"
-                    android:textSize="20dp"
-                    android:id="@+id/reportsNameTv"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Extra Information"
-                    android:textSize="15dp"
-                    android:id="@+id/reportStatusTv"
+                    android:textSize="18dp"
+                    android:id="@+id/waitingUsersTv"
                     />
             </LinearLayout>
         </LinearLayout>
