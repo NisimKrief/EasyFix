@@ -2,23 +2,26 @@ package com.example.easyfix;
 public class User {
     private String KeyId; //מספר מפתח השייך לארגון
     private String uId; // מספר מפתח של המשתמש
+    private String userName;
     private int LastYear; //שנת סיום למידה
     private int ClassNumber; // מספר כיתה / אזור עבודה
     private int UserLevel; // לדוגמה עבור תלמיד 10 מורה 20.....
 
 
 
-    public User(String keyId, String uId, int lastYear, int classNumber) {
+    public User(String keyId, String uId, String userName, int lastYear, int classNumber) {
         KeyId = keyId;
         this.uId = uId;
+        this.userName = userName;
         LastYear = lastYear;
         ClassNumber = classNumber;
         UserLevel = 0;
     }
 
-    public User(String keyId, String uId, int lastYear, int classNumber, int userLevel) {
+    public User(String keyId, String uId, String userName, int lastYear, int classNumber, int userLevel) {
         KeyId = keyId;
         this.uId = uId;
+        this.userName = userName;
         LastYear = lastYear;
         ClassNumber = classNumber;
         UserLevel = userLevel;
@@ -34,6 +37,14 @@ public class User {
 
 
     public User() {
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getKeyId() {

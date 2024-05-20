@@ -3,11 +3,11 @@ package com.example.easyfix;
 import java.util.ArrayList;
 
 public class Organization {
-    String OrganizationName;
-    String KeyId; // מפתח מתאים של הארגון
-    ArrayList<Building> OrganizationBuildings;
-    User Users;
-    Report Reports;
+    private String OrganizationName;
+    private String KeyId; // מפתח מתאים של הארגון
+    private ArrayList<Building> OrganizationBuildings;
+    private User Users;
+    private Report Reports;
 
     public Organization() {
     }

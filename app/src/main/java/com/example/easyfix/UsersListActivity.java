@@ -1,6 +1,7 @@
 package com.example.easyfix;
 
 import static android.content.ContentValues.TAG;
+import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refUsers;
@@ -33,7 +34,7 @@ public class UsersListActivity extends AppCompatActivity {
     String UserUid;
     private FirebaseAuth mAuth;
     ArrayList<User> Users = new ArrayList<User>();
-    String orgKeyId;
+    String orgKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class UsersListActivity extends AppCompatActivity {
         });
         System.out.println(FirebaseAuth.getInstance().getCurrentUser());
         UsersRv=findViewById(R.id.usersListRv);
-        //waitingUsersListAdapter=new ReportListAdapter(Users);
+        waitingUsersListAdapter=new WaitingUsersListAdapter(Users);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         UsersRv.setLayoutManager(layoutManager);
         mAuth = FirebaseAuth.getInstance();
@@ -59,27 +60,52 @@ public class UsersListActivity extends AppCompatActivity {
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    System.out.println(snapshot);
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                        orgKeyId = snapshot1.getKey();
-                        System.out.println(orgKeyId);
-                        refUsers = refUsers.child(orgKeyId);
-                        refWaitingUsers = refWaitingUsers.child(orgKeyId);
-                    }
+                if(orgKeyId == null) { //במידה ולא null, המשתמש כבר נכנס לעמוד הזה ומצא את הkeyId
+                    if (snapshot.exists()) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            orgKey = snapshot1.getKey();
+                            FBref fbref = new FBref();
+                            fbref.foundKeyId(orgKey); // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
+                            refWaitingUsers.addValueEventListener(waitingUsersListener);
+                        }
 
+
+                    } else {
+                        System.out.println("There's no User like that");
+                    }
                 }
                 else{
-                    System.out.println("There's no User like that");
+                    refWaitingUsers.addValueEventListener(waitingUsersListener);
                 }
             }
+
+
+            ValueEventListener waitingUsersListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dS) {
+                    Users.clear();
+                    for(DataSnapshot data : dS.getChildren()){
+                        User user = data.getValue(User.class);
+                        Users.add(user);
+                    }
+                    UsersRv.setAdapter(waitingUsersListAdapter);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Error fetching organizations", error.toException());
+
+
+                }
+            };
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-
-        };query.addListenerForSingleValueEvent(valueEventListener);
+        };
+        query.addListenerForSingleValueEvent(valueEventListener);
 
     }
 }

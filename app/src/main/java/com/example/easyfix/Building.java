@@ -3,7 +3,7 @@ package com.example.easyfix;
 import java.util.ArrayList;
 
 public class Building {
-    ArrayList<String> Area; // אזורים אפשריים לדיווח
+    private ArrayList<String> Area; // אזורים אפשריים לדיווח
 
     public Building(ArrayList<String> area) {
         Area = area;

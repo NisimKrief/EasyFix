@@ -37,7 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private FirebaseAuth mAuth;
-    EditText eTUser, eTPass;
+    EditText eTUser, eTPass, eTPass2, eTFullName;
     //String[] Mosad = {"נא לבחור מוסד: ", "הרב תחומי עמ'ל מקיף ז'", "מקיף א'", "מיקרוסופט" };
     ArrayList<Organization> Organizations = new ArrayList<Organization>();
 
@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mAuth = FirebaseAuth.getInstance();
         eTUser = (EditText) findViewById(R.id.eTUser);
         eTPass = (EditText) findViewById(R.id.eTPass);
+        eTPass2 = (EditText) findViewById(R.id.eTCnfPass);
+        eTFullName = (EditText) findViewById(R.id.eTFullName);
         spinMosad = (Spinner) findViewById(R.id.spinner);
         spinClass = (Spinner) findViewById(R.id.spinner2);
         rememberCheckBox = (CheckBox)findViewById(R.id.checkBox2);
@@ -155,32 +157,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             String Email = eTUser.getText().toString();
             String Password = eTPass.getText().toString();
-        //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
-            mAuth.createUserWithEmailAndPassword(Email, Password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                FirebaseUser fUser = mAuth.getCurrentUser();
-                                String uId = fUser.getUid();
-                                User user = new User(MosadStringId, uId, (calendar.get(Calendar.YEAR) + (12-ClassIdSelected)),ClassIdSelected);
-                                DatabaseReference usersRef = FBDB.getReference("Organizations/" + user.getKeyId() + "/Users");
-                                DatabaseReference usersRef2 = FBDB.getReference("WaitingUsers/" + user.getKeyId());
-                                usersRef.child(uId).setValue(user);
-                                usersRef2.child(uId).setValue(user);
-                                SharedPreferences.Editor editor=sP.edit();
-                                editor.putBoolean("doRemember", rememberCheckBox.isChecked());
-                                editor.apply();
-                                startActivity(new Intent(MainActivity.this, LobbyActivity.class));
-                                Log.d(TAG, "RegisterWithEmailAndPassword:success");
-                                Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+            if(Password.equals(eTPass2.getText().toString())) {
+                //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
+                mAuth.createUserWithEmailAndPassword(Email, Password)
+                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    FirebaseUser fUser = mAuth.getCurrentUser();
+                                    String uId = fUser.getUid();
+                                    User user = new User(MosadStringId, uId, eTFullName.getText().toString(), (calendar.get(Calendar.YEAR) + (12 - ClassIdSelected)), ClassIdSelected);
+                                    DatabaseReference usersRef = FBDB.getReference("Organizations/" + user.getKeyId() + "/Users");
+                                    DatabaseReference usersRef2 = FBDB.getReference("WaitingUsers/" + user.getKeyId());
+                                    usersRef.child(uId).setValue(user);
+                                    usersRef2.child(uId).setValue(user);
+                                    SharedPreferences.Editor editor = sP.edit();
+                                    editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                                    editor.apply();
+                                    startActivity(new Intent(MainActivity.this, LobbyActivity.class));
+                                    Log.d(TAG, "RegisterWithEmailAndPassword:success");
+                                    Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
 
-                            } else {
-                                Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
+                                    Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
+                                }
                             }
-                        }
-                    });
+                        });
+            }
+            else{
+                Toast.makeText(MainActivity.this, "Passwords Not Equal", Toast.LENGTH_SHORT).show();
+            }
+
         }
 
 

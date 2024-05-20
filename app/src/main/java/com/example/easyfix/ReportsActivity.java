@@ -2,6 +2,7 @@ package com.example.easyfix;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.FBDB;
+import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 
 public class ReportsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    String orgKeyId;
+    String orgKey;
     ArrayList<Report> Reports = new ArrayList<Report>();
     RecyclerView ReportRv;
     ReportListAdapter repListAdapter;
@@ -84,19 +85,25 @@ public class ReportsActivity extends AppCompatActivity {
         Query query = refOrganizations.orderByChild(path).equalTo(UserUid);
         //מציאת מפתח ארגון
         ValueEventListener valueEventListener = new ValueEventListener() {
+
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                        orgKeyId = snapshot1.getKey();
-                        //DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
-                        refReports = refReports.child(orgKeyId);
-                        refReports.addValueEventListener(repListener);
-                    }
+                if(orgKeyId == null) { //במידה ולא null, המשתמש כבר נכנס לעמוד הזה ומצא את הkeyId
+                    if (snapshot.exists()) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            orgKey = snapshot1.getKey();
+                            //DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
+                            FBref fbref = new FBref();
+                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
+                            refReports.addValueEventListener(repListener);
+                        }
 
+                    } else {
+                        System.out.println("There's no User like that");
+                    }
                 }
                 else{
-                    System.out.println("There's no User like that");
+                    refReports.addValueEventListener(repListener);
                 }
             }
             ValueEventListener repListener = new ValueEventListener() {

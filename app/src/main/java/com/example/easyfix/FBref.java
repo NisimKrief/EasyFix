@@ -10,5 +10,15 @@ public class FBref {
     public static DatabaseReference refWaitingUsers = FBDB.getReference("WaitingUsers");
     public static DatabaseReference refReports = FBDB.getReference("Reports");
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
+    public static String orgKeyId;
+
+    public void foundKeyId(String orgKeyId){
+        this.orgKeyId = orgKeyId;
+        refOrganizations = refOrganizations.child(orgKeyId);
+        refUsers = refUsers.child(orgKeyId);
+        refWaitingUsers = refWaitingUsers.child(orgKeyId);
+        refReports = refReports.child(orgKeyId);
+        refReportsDone = refReportsDone.child(orgKeyId);
+    }
 
 }

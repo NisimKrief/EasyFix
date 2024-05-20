@@ -2,6 +2,9 @@ package com.example.easyfix;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
+import static com.example.easyfix.FBref.refUsers;
+import static com.example.easyfix.FBref.refWaitingUsers;
+
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,9 +59,35 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
     @Override
     public void onBindViewHolder(WaitingUsersListAdapter.ViewHolder viewHolder, final int position) {
         User user = Users.get(position);
-        String email = fetchUserEmail(user.getuId());
+        String name = user.getUserName();
 
-        viewHolder.waitingUsersTv.setText(email);
+        viewHolder.waitingUsersTv.setText(name);
+        viewHolder.containerll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popupMenu = new PopupMenu(view.getContext(), viewHolder.containerll);
+                popupMenu.inflate(R.menu.waitingusersmenu);
+                popupMenu.show();
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        if (menuItem.getItemId() == R.id.acceptMenu) {
+                            refUsers.child(user.getuId()).setValue(user);
+                            refWaitingUsers.child(user.getuId()).removeValue();
+                            // להוסיף טוסט
+                            return true;
+                        }
+                        if (menuItem.getItemId() == R.id.deleteMenu) {
+                            refWaitingUsers.child(user.getuId()).removeValue();
+                            //להוסיף טוסט הצלחה
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+        });
 
         viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -89,21 +119,5 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
     public int getItemCount() {
         return Users.size();
     }
-    private String fetchUserEmail(String userId) {
-        FirebaseAuth.getInstance().getUser(userId)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = task.getResult();
-                        if (user != null) {
-                            String email = user.getEmail();
-                            if (email != null) {
-                                return email;
-                            }
-                        }
-                    } else {
-                        Log.w(TAG, "Failed to fetch user email", task.getException());
-                    }
-                });
-        return "No Email?";
-    }
+
 }
