@@ -1,4 +1,4 @@
-package com.example.easyfix;
+package com.example.easyfix.Classes;
 public class User {
     private String KeyId; //מספר מפתח השייך לארגון
     private String uId; // מספר מפתח של המשתמש

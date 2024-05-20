@@ -1,10 +1,7 @@
-package com.example.easyfix;
+package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.orgKeyId;
-import static com.example.easyfix.FBref.refOrganizations;
-import static com.example.easyfix.FBref.refReports;
-import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
 import android.os.Bundle;
@@ -19,6 +16,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.easyfix.Adapters.WaitingUsersListAdapter;
+import com.example.easyfix.FBref;
+import com.example.easyfix.R;
+import com.example.easyfix.Classes.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;

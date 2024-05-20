@@ -1,14 +1,12 @@
-package com.example.easyfix;
+package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
-import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,12 +27,15 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.easyfix.Adapters.ReportListAdapter;
+import com.example.easyfix.FBref;
+import com.example.easyfix.R;
+import com.example.easyfix.Classes.Report;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 

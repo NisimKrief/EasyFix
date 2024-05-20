@@ -13,19 +13,19 @@
         android:theme="@style/Theme.EasyFix"
         tools:targetApi="31">
         <activity
-            android:name=".UsersListActivity"
+            android:name=".Activites.UsersListActivity"
             android:exported="false" />
         <activity
-            android:name=".LobbyActivity"
+            android:name=".Activites.LobbyActivity"
             android:exported="false" />
         <activity
-            android:name=".LogInActivity"
+            android:name=".Activites.LogInActivity"
             android:exported="false" />
         <activity
-            android:name=".ReportsActivity"
+            android:name=".Activites.ReportsActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Activites.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

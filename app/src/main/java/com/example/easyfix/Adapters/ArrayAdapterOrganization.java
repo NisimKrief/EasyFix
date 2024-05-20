@@ -1,15 +1,16 @@
-package com.example.easyfix;
+package com.example.easyfix.Adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.example.easyfix.Classes.Organization;
+import com.example.easyfix.R;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class ArrayAdapterOrganization extends BaseAdapter {
     private Context context;

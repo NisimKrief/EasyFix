@@ -1,4 +1,4 @@
-package com.example.easyfix;
+package com.example.easyfix.Classes;
 
 public class Report {
     private String reporter; // The User who reported

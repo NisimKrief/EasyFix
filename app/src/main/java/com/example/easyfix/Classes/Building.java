@@ -1,4 +1,4 @@
-package com.example.easyfix;
+package com.example.easyfix.Classes;
 
 import java.util.ArrayList;
 

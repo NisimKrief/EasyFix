@@ -1,4 +1,4 @@
-package com.example.easyfix;
+package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
@@ -23,6 +23,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import com.example.easyfix.Adapters.ArrayAdapterOrganization;
+import com.example.easyfix.Classes.Organization;
+import com.example.easyfix.R;
+import com.example.easyfix.Classes.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -31,8 +35,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -167,10 +169,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                     FirebaseUser fUser = mAuth.getCurrentUser();
                                     String uId = fUser.getUid();
                                     User user = new User(MosadStringId, uId, eTFullName.getText().toString(), (calendar.get(Calendar.YEAR) + (12 - ClassIdSelected)), ClassIdSelected);
-                                    DatabaseReference usersRef = FBDB.getReference("Organizations/" + user.getKeyId() + "/Users");
-                                    DatabaseReference usersRef2 = FBDB.getReference("WaitingUsers/" + user.getKeyId());
+                                    DatabaseReference usersRef = FBDB.getReference("WaitingUsers/" + user.getKeyId());
                                     usersRef.child(uId).setValue(user);
-                                    usersRef2.child(uId).setValue(user);
                                     SharedPreferences.Editor editor = sP.edit();
                                     editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                                     editor.apply();

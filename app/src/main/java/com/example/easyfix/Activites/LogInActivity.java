@@ -1,4 +1,4 @@
-package com.example.easyfix;
+package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
@@ -18,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.easyfix.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
