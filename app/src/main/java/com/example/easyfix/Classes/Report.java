@@ -25,6 +25,14 @@ public class Report {
         MalfunctionArea = malfunctionArea;
         TimeReported = timeReported;
         ExtraInformation = extraInformation;
+        ReportPhoto = "Null"; // בנאי כאשר משתמש לא הוסיף תמונת תקלה.
+
+        UrgencyLevel = "Null"; //  ערכים אלה יתעדכנו רק כאשר טכנאי יתקן את התקלה
+        MalfunctionFixer = "Null";
+        TimeFixed = "Null";
+        FixedPhoto = "Null";
+
+
     }
 
     public Report(String reporter, String reportMainType, Integer malfunctionArea, String timeReported, String extraInformation, String reportPhoto) {
@@ -35,6 +43,11 @@ public class Report {
         TimeReported = timeReported;
         ExtraInformation = extraInformation;
         ReportPhoto = reportPhoto;
+
+        UrgencyLevel = "Null"; //  ערכים אלה יתעדכנו רק כאשר טכנאי יתקן את התקלה
+        MalfunctionFixer = "Null";
+        TimeFixed = "Null";
+        FixedPhoto = "Null";
     }
 
     public String getReporter() {

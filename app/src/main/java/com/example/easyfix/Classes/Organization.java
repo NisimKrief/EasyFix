@@ -6,8 +6,6 @@ public class Organization {
     private String OrganizationName;
     private String KeyId; // מפתח מתאים של הארגון
     private ArrayList<Building> OrganizationBuildings;
-    private User Users;
-    private Report Reports;
 
     public Organization() {
     }
@@ -28,10 +26,6 @@ public class Organization {
         OrganizationName = organizationName;
     }
 
-    public Report getReports() {
-        return Reports;
-    }
-
     public String getKeyId() {
         return KeyId;
     }
@@ -48,17 +42,6 @@ public class Organization {
         OrganizationBuildings = organizationBuildings;
     }
 
-    public User getUsers() {
-        return Users;
-    }
-
-    public void setUsers(User users) {
-        Users = users;
-    }
-
-    public void setReports(Report reports) {
-        Reports = reports;
-    }
 }
 
 /*

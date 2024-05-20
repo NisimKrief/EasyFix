@@ -2,8 +2,8 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.orgKeyId;
-import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
+import static com.example.easyfix.FBref.refUsers;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -82,8 +82,8 @@ public class ReportsActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser FUser = mAuth.getCurrentUser();
         UserUid = FUser.getUid();
-        String path = "Users/" + UserUid + "/uId"; // הגעה ישירות למיקום הuId
-        Query query = refOrganizations.orderByChild(path).equalTo(UserUid);
+        String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
+        Query query = refUsers.orderByChild(path).equalTo(UserUid);
         //מציאת מפתח ארגון
         ValueEventListener valueEventListener = new ValueEventListener() {
 
