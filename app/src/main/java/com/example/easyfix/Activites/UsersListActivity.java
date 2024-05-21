@@ -2,6 +2,7 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.orgKeyId;
+import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
 import android.os.Bundle;
@@ -36,6 +37,7 @@ public class UsersListActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     ArrayList<User> Users = new ArrayList<User>();
     String orgKey;
+    int lastYear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +59,7 @@ public class UsersListActivity extends AppCompatActivity {
         UserUid = FUser.getUid();
         String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
         Query query = refWaitingUsers.orderByChild(path).equalTo(UserUid); //  לשנות את זה לrefUsers אחרי שאני מסדר את הרמות
+
         //מציאת מפתח ארגון
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -67,7 +70,6 @@ public class UsersListActivity extends AppCompatActivity {
                             orgKey = snapshot1.getKey();
                             FBref fbref = new FBref();
                             fbref.foundKeyId(orgKey); // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
-                            refWaitingUsers.addValueEventListener(waitingUsersListener);
                         }
 
 
@@ -76,7 +78,19 @@ public class UsersListActivity extends AppCompatActivity {
                     }
                 }
                 else{
-                    refWaitingUsers.addValueEventListener(waitingUsersListener);
+                    refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            lastYear = snapshot.child("lastYear").getValue(Integer.class);
+                            Query sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // סינון לפי שכבה, יופיעו רק משתמשים באותה השכבה
+                            sameLastYear.addValueEventListener(waitingUsersListener);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }
             }
 
@@ -84,6 +98,7 @@ public class UsersListActivity extends AppCompatActivity {
             ValueEventListener waitingUsersListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dS) {
+                    System.out.println(dS);
                     Users.clear();
                     for(DataSnapshot data : dS.getChildren()){
                         User user = data.getValue(User.class);
