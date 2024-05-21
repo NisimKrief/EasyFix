@@ -20,5 +20,13 @@ public class FBref {
         refReports = refReports.child(orgKeyId);
         refReportsDone = refReportsDone.child(orgKeyId);
     }
+    public void loggedOut(){ // כאשר משתמש יוצא, לאתחל את מצביעי הפיירבייס כך שאם יתחבר למוסד אחר לא יופיע את המוסד הקודם.
+        refOrganizations = FBDB.getReference("Organizations");
+        refUsers = FBDB.getReference("Users");
+        refWaitingUsers = FBDB.getReference("WaitingUsers");
+        refReports = FBDB.getReference("Reports");
+        refReportsDone = FBDB.getReference("ReportsDone");
+        orgKeyId = "";
+    }
 
 }

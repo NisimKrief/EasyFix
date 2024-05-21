@@ -142,6 +142,8 @@ public class ReportsActivity extends AppCompatActivity {
         SharedPreferences.Editor editor=sP.edit();
         editor.putBoolean("doRemember", false); // לעדכן שהמשתמש יצא וצריך לשמור כניסה מחדש
         editor.apply();
+        FBref fbref = new FBref();
+        fbref.loggedOut();
         Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
         Toast.makeText(ReportsActivity.this, "Logout Successfully", Toast.LENGTH_SHORT).show();
         startActivity(intent);

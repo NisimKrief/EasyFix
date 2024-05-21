@@ -2,6 +2,10 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.easyfix.FBref.orgKeyId;
+import static com.example.easyfix.FBref.refReports;
+import static com.example.easyfix.FBref.refUsers;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,12 +22,19 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.easyfix.Classes.Report;
+import com.example.easyfix.Classes.User;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class LogInActivity extends AppCompatActivity {
     EditText eTUser, eTPass;
@@ -31,6 +42,8 @@ public class LogInActivity extends AppCompatActivity {
     CheckBox rememberCheckBox;
     boolean rememberChecked;
     SharedPreferences sP;
+    String orgKey;
+    int userLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +79,40 @@ public class LogInActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor=sP.edit();
                             editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                             editor.apply();
-                            startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
+                            mAuth = FirebaseAuth.getInstance();
+                            FirebaseUser FUser = mAuth.getCurrentUser();
+                            String UserUid = FUser.getUid();
+                            String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
+                            Query query = refUsers.orderByChild(path).equalTo(UserUid); //מציאת ומיקוד המוסד ששל המשתמש ישר כאשר הוא מתחבר.
+                            ValueEventListener valueEventListener = new ValueEventListener() {
+
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists()) {
+                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                            orgKey = snapshot1.getKey();
+                                            userLevel =snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
+                                            System.out.println(userLevel);
+                                            FBref fbref = new FBref();
+                                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
+                                            if(userLevel == 1){
+                                                startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
+                                            }
+                                            else{
+                                                startActivity(new Intent(LogInActivity.this, LobbyActivity.class));
+                                            }
+                                            }
+
+                                        } else {
+                                            System.out.println("There's no User like that"); // הוא עדיין בwaitingUsers
+                                        }
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            };
+                            query.addListenerForSingleValueEvent(valueEventListener);
                             Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "signInWithEmailAndPassword:success");
                             FirebaseUser user = mAuth.getCurrentUser();
@@ -79,4 +125,5 @@ public class LogInActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }

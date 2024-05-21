@@ -68,6 +68,7 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         if (menuItem.getItemId() == R.id.acceptMenu) {
+                            user.setUserLevel(1);
                             refUsers.child(user.getuId()).setValue(user);
                             refWaitingUsers.child(user.getuId()).removeValue();
                             // להוסיף טוסט

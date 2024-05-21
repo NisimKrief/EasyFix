@@ -23,7 +23,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     private ArrayList<Report> Reports;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView ReportNameTv, ReportStatusTv;
+        private final TextView ReportNameTv, ReportExInfoTv;
         private final CardView cardView;
 
         /**
@@ -41,7 +41,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
             super(view);
 
             ReportNameTv = (TextView) view.findViewById(R.id.reportsNameTv);
-            ReportStatusTv = (TextView) view.findViewById(R.id.reportStatusTv);
+            ReportExInfoTv = (TextView) view.findViewById(R.id.reportExInfoTv);
             cardView = (CardView) view.findViewById(R.id.cardId);
             containerll = (LinearLayout) view.findViewById(R.id.containerLL);
 
@@ -83,7 +83,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         viewHolder.ReportNameTv.setText(Reports.get(position).getReportMainType());
-        viewHolder.ReportStatusTv.setText(Reports.get(position).getExtraInformation());
+        viewHolder.ReportExInfoTv.setText(Reports.get(position).getExtraInformation());
 
 
         String status = Reports.get(position).getUrgencyLevel();
@@ -91,15 +91,15 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
         if (status != null) {
             if (status.toLowerCase().equals("medium")) {
-                viewHolder.ReportStatusTv.setTextColor(Color.parseColor("#FFD300"));
+                viewHolder.ReportExInfoTv.setTextColor(Color.parseColor("#FFD300"));
             } else if (status.toLowerCase().equals("high")) {
-                viewHolder.ReportStatusTv.setTextColor(Color.parseColor("#d43751"));
+                viewHolder.ReportExInfoTv.setTextColor(Color.parseColor("#d43751"));
                 // viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#8AFFA9"));
             } else {
-                viewHolder.ReportStatusTv.setTextColor(Color.parseColor("#FFFFFF"));
+                viewHolder.ReportExInfoTv.setTextColor(Color.parseColor("#000000"));
             }
         } else {
-            viewHolder.ReportStatusTv.setTextColor(Color.parseColor("#000000"));
+            viewHolder.ReportExInfoTv.setTextColor(Color.parseColor("#000000"));
         }
 
         /* viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
