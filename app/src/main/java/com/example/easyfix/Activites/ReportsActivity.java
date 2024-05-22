@@ -49,6 +49,7 @@ public class ReportsActivity extends AppCompatActivity {
     ReportListAdapter repListAdapter;
     SharedPreferences sP;
     String UserUid;
+    String reporter;
 
 
     @Override
@@ -104,6 +105,17 @@ public class ReportsActivity extends AppCompatActivity {
                     }
                 }
                 else{
+                    refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            reporter = snapshot.child("userName").getValue(String.class);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                     refReports.addValueEventListener(repListener);
                 }
             }
@@ -143,7 +155,7 @@ public class ReportsActivity extends AppCompatActivity {
         editor.putBoolean("doRemember", false); // לעדכן שהמשתמש יצא וצריך לשמור כניסה מחדש
         editor.apply();
         FBref fbref = new FBref();
-        fbref.loggedOut();
+        fbref.loggedOut(); // כאשר משתמש יוצא, לאתחל את מצביעי הפיירבייס כך שאם יתחבר למוסד אחר לא יופיע את המוסד הקודם.
         Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
         Toast.makeText(ReportsActivity.this, "Logout Successfully", Toast.LENGTH_SHORT).show();
         startActivity(intent);
@@ -166,7 +178,7 @@ public class ReportsActivity extends AppCompatActivity {
                 //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
                 DatabaseReference reportsRef = refReports;
                 Report report = new Report(
-                        UserUid, // reporter
+                        reporter, // reporter
                         reportTitle.getText().toString(), // reportMainType
                         1, // malfunctionArea (you can set this based on your requirements)
                         String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
