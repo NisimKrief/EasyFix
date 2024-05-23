@@ -2,7 +2,6 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
@@ -10,6 +9,7 @@ import static com.example.easyfix.FBref.refWaitingUsers;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -26,9 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import com.example.easyfix.Adapters.ArrayAdapterOrganization;
-import com.example.easyfix.Classes.Building;
 import com.example.easyfix.Classes.Organization;
-import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,7 +36,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -63,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     Calendar calendar;
     CheckBox rememberCheckBox;
     SharedPreferences sP;
+    ProgressDialog pd;
+
 
     public void onStart() {
         super.onStart();
@@ -83,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         eTPass2 = (EditText) findViewById(R.id.eTCnfPass);
         eTFullName = (EditText) findViewById(R.id.eTFullName);
         spinMosad = (Spinner) findViewById(R.id.spinner);
-        spinClass = (Spinner) findViewById(R.id.spinner2);
+        spinClass = (Spinner) findViewById(R.id.spinnerRooms);
         rememberCheckBox = (CheckBox)findViewById(R.id.checkBox2);
         //ArrayAdapter<String> adpMosad = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Mosad);
         ArrayAdapter<String> adpBeforePicking = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, BeforePicking);
@@ -143,9 +142,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         str2.add("שירותים");
         str2.add("חדר 201");
         str2.add("חדר 202");
-        Building Mea = new Building("100", str1);
+        Building Mea = new Building("100 בניין", str1);
         OrganizationBuildings.add(Mea);
-        OrganizationBuildings.add(new Building("200", str2));
+        OrganizationBuildings.add(new Building("200 בניין", str2));
         System.out.println(OrganizationBuildings);
         Organization test = new Organization("TestMosad3", keyId, OrganizationBuildings);
         FBref.refOrganizations.child(keyId).setValue(test).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
     public void Register(View view) {
-
+            pd = ProgressDialog.show(this, "Trying to register...", "",true);
             String Email = eTUser.getText().toString();
             String Password = eTPass.getText().toString();
             if(Password.equals(eTPass2.getText().toString())) {
@@ -196,11 +195,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                     SharedPreferences.Editor editor = sP.edit();
                                     editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                                     editor.apply();
+                                    pd.dismiss();
                                     startActivity(new Intent(MainActivity.this, LobbyActivity.class)); // להעביר אותם למסך/לבקש מהם לחכות שיאשרו אותם.
                                     Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                     Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
 
                                 } else {
+                                    pd.dismiss();
                                     Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
                                     Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
                                 }
@@ -208,6 +209,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         });
             }
             else{
+                pd.dismiss();
                 Toast.makeText(MainActivity.this, "Passwords Not Equal", Toast.LENGTH_SHORT).show();
             }
 

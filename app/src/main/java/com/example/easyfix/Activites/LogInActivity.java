@@ -2,10 +2,9 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.easyfix.FBref.orgKeyId;
-import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refUsers;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,8 +21,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.easyfix.Classes.Report;
-import com.example.easyfix.Classes.User;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -44,6 +41,7 @@ public class LogInActivity extends AppCompatActivity {
     SharedPreferences sP;
     String orgKey;
     int userLevel;
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +67,7 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     public void Login(View view) {
+        pd = ProgressDialog.show(this, "Trying to log in...", "",true);
         String Email = eTUser.getText().toString();
         String Password = eTPass.getText().toString();
         mAuth.signInWithEmailAndPassword(Email, Password)
@@ -95,6 +94,7 @@ public class LogInActivity extends AppCompatActivity {
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
                                             fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
+                                            pd.dismiss();
                                             if(userLevel == 1 || userLevel == 100){
                                                 startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
                                             }
@@ -118,6 +118,7 @@ public class LogInActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                         } else {
                             // If sign in fails, display a message to the user.
+                            pd.dismiss();
                             Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
                             Toast.makeText(LogInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();

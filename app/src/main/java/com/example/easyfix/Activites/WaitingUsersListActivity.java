@@ -5,6 +5,7 @@ import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,6 +39,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
     ArrayList<User> Users = new ArrayList<User>();
     String orgKey;
     int lastYear;
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        pd = ProgressDialog.show(this, "Loading Reports...", "",true);
         waitingUsersRv =findViewById(R.id.usersListRv);
         waitingUsersListAdapter=new WaitingUsersListAdapter(Users);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
@@ -104,6 +107,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                         Users.add(user);
                     }
                     waitingUsersRv.setAdapter(waitingUsersListAdapter);
+                    pd.dismiss();
                 }
 
                 @Override

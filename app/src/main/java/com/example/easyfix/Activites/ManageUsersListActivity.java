@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,6 +39,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
     ArrayList<User> Users = new ArrayList<User>();
     String orgKey;
     int userLevel;
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        pd = ProgressDialog.show(this, "Finding Users...", "",true);
         UsersRv =findViewById(R.id.usersListRv);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         UsersRv.setLayoutManager(layoutManager);
@@ -74,19 +77,19 @@ public class ManageUsersListActivity extends AppCompatActivity {
                     }
                     Collections.reverse(Users);
                     UsersRv.setAdapter(UsersListAdapter);
+                    pd.dismiss();
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Error fetching organizations", error.toException());
-
-
+                    Log.e(TAG, "Error fetching users", error.toException());
+                    pd.dismiss();
                 }
             };
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                pd.dismiss();
             }
         });
 

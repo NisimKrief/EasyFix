@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.easyfix.Classes.Building;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
 
@@ -21,9 +22,10 @@ import java.util.ArrayList;
 public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.ViewHolder> {
 
     private ArrayList<Report> Reports;
+    ArrayList<Building> Buildings;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView ReportNameTv, ReportExInfoTv;
+        private final TextView ReportNameTv, ReportExInfoTv, ReportAreaTv;
         private final CardView cardView;
 
         /**
@@ -42,6 +44,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
 
             ReportNameTv = (TextView) view.findViewById(R.id.reportsNameTv);
             ReportExInfoTv = (TextView) view.findViewById(R.id.reportExInfoTv);
+            ReportAreaTv = (TextView) view.findViewById(R.id.reportAreaTv);
             cardView = (CardView) view.findViewById(R.id.cardId);
             containerll = (LinearLayout) view.findViewById(R.id.containerLL);
 
@@ -62,8 +65,9 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      *
      * @param taskDataset the task dataset
      */
-    public ReportListAdapter(ArrayList<Report> taskDataset) {
+    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings) {
         this.Reports = taskDataset;
+        Buildings = buildings;
     }
 
     // Create new views (invoked by the layout manager)
@@ -84,6 +88,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         // contents of the view with that element
         viewHolder.ReportNameTv.setText(Reports.get(position).getReportMainType());
         viewHolder.ReportExInfoTv.setText(Reports.get(position).getExtraInformation());
+        viewHolder.ReportAreaTv.setText(Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getBuildingName()); // מעלים באחד בגלל שיש את הבניין דמה.
 
 
         String status = Reports.get(position).getUrgencyLevel();
