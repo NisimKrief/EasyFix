@@ -95,7 +95,7 @@ public class LogInActivity extends AppCompatActivity {
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
                                             fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
-                                            if(userLevel == 1){
+                                            if(userLevel == 1 || userLevel == 100){
                                                 startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
                                             }
                                             else{

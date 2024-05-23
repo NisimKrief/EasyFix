@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                     SharedPreferences.Editor editor = sP.edit();
                                     editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                                     editor.apply();
-                                    startActivity(new Intent(MainActivity.this, LobbyActivity.class));
+                                    startActivity(new Intent(MainActivity.this, LobbyActivity.class)); // להעביר אותם למסך/לבקש מהם לחכות שיאשרו אותם.
                                     Log.d(TAG, "RegisterWithEmailAndPassword:success");
                                     Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
 

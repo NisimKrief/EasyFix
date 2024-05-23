@@ -13,7 +13,10 @@
         android:theme="@style/Theme.EasyFix"
         tools:targetApi="31">
         <activity
-            android:name=".Activites.UsersListActivity"
+            android:name=".Activites.ManageUsersListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activites.WaitingUsersListActivity"
             android:exported="false" />
         <activity
             android:name=".Activites.LobbyActivity"

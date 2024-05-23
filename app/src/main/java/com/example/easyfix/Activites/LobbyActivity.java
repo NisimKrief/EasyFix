@@ -30,7 +30,11 @@ public class LobbyActivity extends AppCompatActivity {
         startActivity(new Intent(LobbyActivity.this, ReportsActivity.class));
     }
 
-    public void moveToUsers(View view) {
-        startActivity(new Intent(LobbyActivity.this, UsersListActivity.class));
+    public void moveToWaitingUsers(View view) {
+        startActivity(new Intent(LobbyActivity.this, WaitingUsersListActivity.class));
+    }
+
+    public void moveToManageUsers(View view) {
+        startActivity(new Intent(LobbyActivity.this, ManageUsersListActivity.class));
     }
 }

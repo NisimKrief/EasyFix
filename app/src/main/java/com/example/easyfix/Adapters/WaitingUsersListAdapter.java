@@ -84,31 +84,6 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
                 });
             }
         });
-
-        viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                PopupMenu popupMenu = new PopupMenu(view.getContext(), viewHolder.containerll);
-                popupMenu.inflate(R.menu.waitingusersmenu);
-                popupMenu.show();
-
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        if (menuItem.getItemId() == R.id.acceptMenu) {
-
-                            return true;
-                        }
-                        if (menuItem.getItemId() == R.id.deleteMenu) {
-
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-                return false;
-            }
-        });
     }
 
     @Override

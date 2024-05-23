@@ -11,25 +11,38 @@
         android:id="@+id/button2"
         android:layout_width="126dp"
         android:layout_height="71dp"
-        android:text="Reports"
         android:onClick="moveToReports"
+        android:text="Reports"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.743"
+        app:layout_constraintHorizontal_bias="0.831"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.749" />
+        app:layout_constraintVertical_bias="0.751" />
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="109dp"
-        android:layout_height="67dp"
-        android:text="Users"
-        android:onClick="moveToUsers"
+        android:layout_width="126dp"
+        android:layout_height="71dp"
+        android:onClick="moveToWaitingUsers"
+        android:text="Waiting Users"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.209"
+        app:layout_constraintHorizontal_bias="0.178"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.749" />
+        app:layout_constraintVertical_bias="0.751" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="126dp"
+        android:layout_height="71dp"
+        android:text="Manage Users"
+        android:onClick="moveToManageUsers"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.468" />
 </androidx.constraintlayout.widget.ConstraintLayout>

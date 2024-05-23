@@ -1,7 +1,6 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
-import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
@@ -17,10 +16,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.easyfix.Adapters.WaitingUsersListAdapter;
-import com.example.easyfix.FBref;
-import com.example.easyfix.R;
+import com.example.easyfix.Adapters.UsersListAdapter;
 import com.example.easyfix.Classes.User;
+import com.example.easyfix.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,72 +28,40 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class UsersListActivity extends AppCompatActivity {
+public class ManageUsersListActivity extends AppCompatActivity {
     RecyclerView UsersRv;
-    WaitingUsersListAdapter waitingUsersListAdapter;
+    UsersListAdapter UsersListAdapter;
     String UserUid;
     private FirebaseAuth mAuth;
     ArrayList<User> Users = new ArrayList<User>();
     String orgKey;
-    int lastYear;
+    int userLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_waitingusers_list);
+        setContentView(R.layout.activity_manage_users_list);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        System.out.println(FirebaseAuth.getInstance().getCurrentUser());
-        UsersRv=findViewById(R.id.usersListRv);
-        waitingUsersListAdapter=new WaitingUsersListAdapter(Users);
+        UsersRv =findViewById(R.id.usersListRv);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         UsersRv.setLayoutManager(layoutManager);
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser FUser = mAuth.getCurrentUser();
         UserUid = FUser.getUid();
-        String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
-        Query query = refWaitingUsers.orderByChild(path).equalTo(UserUid); //  לשנות את זה לrefUsers אחרי שאני מסדר את הרמות
-
-        //מציאת מפתח ארגון
-        ValueEventListener valueEventListener = new ValueEventListener() {
+        refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(orgKeyId == null) { //במידה ולא null, המשתמש כבר נכנס לעמוד הזה ומצא את הkeyId
-                    if (snapshot.exists()) {
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                            orgKey = snapshot1.getKey();
-                            FBref fbref = new FBref();
-                            fbref.foundKeyId(orgKey); // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
-                        }
-
-
-                    } else {
-                        System.out.println("There's no User like that");
-                    }
-                }
-                else{
-                    refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            lastYear = snapshot.child("lastYear").getValue(Integer.class);
-                            Query sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // סינון לפי שכבה, יופיעו רק משתמשים באותה השכבה
-                            sameLastYear.addValueEventListener(waitingUsersListener);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                }
+                userLevel = snapshot.child("userLevel").getValue(Integer.class);
+                UsersListAdapter=new UsersListAdapter(Users, userLevel);
+                Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(userLevel -1); // סינון לפי דרגה, יופיעו רק משתמשים בדרגה נמוכה יותר, מורים יראו רק תלמידים, מנהלים יראו את כולם.
+                higherUserLevel.addValueEventListener(ManageUsersListener);
             }
-
-
-            ValueEventListener waitingUsersListener = new ValueEventListener() {
+            ValueEventListener ManageUsersListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dS) {
                     System.out.println(dS);
@@ -104,7 +70,7 @@ public class UsersListActivity extends AppCompatActivity {
                         User user = data.getValue(User.class);
                         Users.add(user);
                     }
-                    UsersRv.setAdapter(waitingUsersListAdapter);
+                    UsersRv.setAdapter(UsersListAdapter);
                 }
 
                 @Override
@@ -115,13 +81,11 @@ public class UsersListActivity extends AppCompatActivity {
                 }
             };
 
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        };
-        query.addListenerForSingleValueEvent(valueEventListener);
+        });
 
     }
 }

@@ -63,9 +63,9 @@
         app:layout_constraintVertical_bias="0.884" />
 
     <TextView
-        android:id="@+id/RegTv2"
-        android:layout_width="240dp"
-        android:layout_height="55dp"
+        android:id="@+id/textView2"
+        android:layout_width="122dp"
+        android:layout_height="54dp"
         android:layout_marginTop="3dp"
         android:onClick="RegisterScreen"
         android:text="Register"
@@ -74,10 +74,10 @@
         app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.695"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.961" />
+        app:layout_constraintVertical_bias="0.959" />
 
     <TextView
         android:id="@+id/textView3"

@@ -5,27 +5,21 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2a9bb0"
-    tools:context=".Activites.WaitingUsersListActivity">
-
-    <!-- EasyFix title -->
-
-    <!-- Rounded RecyclerView using CardView -->
+    android:background="#f5a623"
+    tools:context=".Activites.ManageUsersListActivity">
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waiting Users"
+        android:layout_marginTop="16dp"
+        android:text="Manage Users"
         android:textColor="#FFFFFF"
         android:textSize="24dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
@@ -38,7 +32,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        app:cardCornerRadius="20dp"> <!-- Set corner radius -->
+        app:cardCornerRadius="20dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/usersListRv"
