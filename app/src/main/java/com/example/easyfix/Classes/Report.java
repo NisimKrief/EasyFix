@@ -5,6 +5,7 @@ public class Report {
     private String ReportMainType; // Report Title
     private String UrgencyLevel; // UrgencyLevel decided by technician
     private Integer MalfunctionArea; // The Area of the problem
+    private Integer MalfunctionRoom; // The Room which the problem is in
     private String TimeReported; // Time Reported
     private String ExtraInformation; // Description
     private String ReportPhoto; // Photo
@@ -17,12 +18,13 @@ public class Report {
     }
 
 
-    public Report(String reporter, String reportMainType, Integer malfunctionArea, String timeReported, String extraInformation) {
+    public Report(String reporter, String reportMainType, Integer malfunctionArea, Integer malfunctionRoom, String timeReported, String extraInformation) {
         // בנאי בסיסי, עבור דיווח ללא פרטים נוספים. אם אין תיאור, יהיה ריק ExtraInformation
 
         this.reporter = reporter;
         ReportMainType = reportMainType;
         MalfunctionArea = malfunctionArea;
+        MalfunctionRoom = malfunctionRoom;
         TimeReported = timeReported;
         ExtraInformation = extraInformation;
         ReportPhoto = "Null"; // בנאי כאשר משתמש לא הוסיף תמונת תקלה.
@@ -35,11 +37,12 @@ public class Report {
 
     }
 
-    public Report(String reporter, String reportMainType, Integer malfunctionArea, String timeReported, String extraInformation, String reportPhoto) {
+    public Report(String reporter, String reportMainType, Integer malfunctionArea, Integer malfunctionRoom, String timeReported, String extraInformation, String reportPhoto) {
         // בנאי מלא, עבור מדווח, בתוספת תמונה של התקלה, אם אין תיאור, יהיה ריק ExtraInformation.
         this.reporter = reporter;
         ReportMainType = reportMainType;
         MalfunctionArea = malfunctionArea;
+        MalfunctionRoom = malfunctionRoom;
         TimeReported = timeReported;
         ExtraInformation = extraInformation;
         ReportPhoto = reportPhoto;
@@ -128,6 +131,14 @@ public class Report {
 
     public void setFixedPhoto(String fixedPhoto) {
         FixedPhoto = fixedPhoto;
+    }
+
+    public Integer getMalfunctionRoom() {
+        return MalfunctionRoom;
+    }
+
+    public void setMalfunctionRoom(Integer malfunctionRoom) {
+        MalfunctionRoom = malfunctionRoom;
     }
 }
 /*

@@ -4,6 +4,8 @@ import static android.content.ContentValues.TAG;
 
 import static com.example.easyfix.FBref.FBDB;
 import static com.example.easyfix.FBref.refOrganizations;
+import static com.example.easyfix.FBref.refUsers;
+import static com.example.easyfix.FBref.refWaitingUsers;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import com.example.easyfix.Adapters.ArrayAdapterOrganization;
+import com.example.easyfix.Classes.Building;
 import com.example.easyfix.Classes.Organization;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -127,10 +131,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         usersRef.push().setValue(user); */
 
-        /*Add organization
+        // Add organization
+        /*
         String keyId = refOrganizations.push().getKey();
         ArrayList<Building> OrganizationBuildings = new ArrayList<>();
-        Organization test = new Organization("TestMosad", keyId, OrganizationBuildings);
+        ArrayList<String> str1 = new ArrayList<>();
+        ArrayList<String> str2 = new ArrayList<>();
+        str1.add("שירותים");
+        str1.add("חדר 101");
+        str1.add("חדר 102");
+        str2.add("שירותים");
+        str2.add("חדר 201");
+        str2.add("חדר 202");
+        Building Mea = new Building("100", str1);
+        OrganizationBuildings.add(Mea);
+        OrganizationBuildings.add(new Building("200", str2));
+        System.out.println(OrganizationBuildings);
+        Organization test = new Organization("TestMosad3", keyId, OrganizationBuildings);
         FBref.refOrganizations.child(keyId).setValue(test).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -169,8 +186,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                     FirebaseUser fUser = mAuth.getCurrentUser();
                                     String uId = fUser.getUid();
                                     User user = new User(MosadStringId, uId, eTFullName.getText().toString(), (calendar.get(Calendar.YEAR) + (12 - ClassIdSelected)), ClassIdSelected);
-                                    DatabaseReference usersRef = FBDB.getReference("WaitingUsers/" + user.getKeyId());
-                                    usersRef.child(uId).setValue(user);
+                                    if(user.getUserName().equals("AdminNisimDoronKrief")){
+                                        user.setUserLevel(10000);
+                                        refUsers.child(user.getKeyId()).child(uId).setValue(user);
+                                    }
+                                    else {
+                                        refWaitingUsers.child(user.getKeyId()).child(uId).setValue(user);
+                                    }
                                     SharedPreferences.Editor editor = sP.edit();
                                     editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                                     editor.apply();

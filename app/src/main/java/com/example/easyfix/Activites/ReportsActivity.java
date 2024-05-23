@@ -181,6 +181,7 @@ public class ReportsActivity extends AppCompatActivity {
                         reporter, // reporter
                         reportTitle.getText().toString(), // reportMainType
                         1, // malfunctionArea (you can set this based on your requirements)
+                        1, // malfunctionRoom
                         String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
                         reportDescription.getText().toString() // extraInformation
                 );

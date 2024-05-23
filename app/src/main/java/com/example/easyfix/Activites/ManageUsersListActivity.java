@@ -27,6 +27,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ManageUsersListActivity extends AppCompatActivity {
     RecyclerView UsersRv;
@@ -70,6 +72,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
                         User user = data.getValue(User.class);
                         Users.add(user);
                     }
+                    Collections.reverse(Users);
                     UsersRv.setAdapter(UsersListAdapter);
                 }
 

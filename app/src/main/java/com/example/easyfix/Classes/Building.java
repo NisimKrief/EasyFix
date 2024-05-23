@@ -3,19 +3,30 @@ package com.example.easyfix.Classes;
 import java.util.ArrayList;
 
 public class Building {
-    private ArrayList<String> Area; // אזורים אפשריים לדיווח
+    private String buildingName;
+    private ArrayList<String> rooms; // List of rooms in the building
 
-    public Building(ArrayList<String> area) {
-        Area = area;
+    public Building() {
     }
 
-    public ArrayList<String> getArea() {
-        return Area;
+    public Building(String name, ArrayList<String> rooms) {
+        this.buildingName = name;
+        this.rooms = rooms;
     }
 
-    public void setArea(ArrayList<String> area) {
-        Area = area;
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String name) {
+        this.buildingName = name;
+    }
+
+    public ArrayList<String> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(ArrayList<String> rooms) {
+        this.rooms = rooms;
     }
 }
-
-//שם המתחם - מסוג  String
