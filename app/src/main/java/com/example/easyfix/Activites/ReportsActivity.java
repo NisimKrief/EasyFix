@@ -61,6 +61,7 @@ public class ReportsActivity extends AppCompatActivity {
     String UserUid;
     String reporter;
     ProgressDialog pd;
+    ValueEventListener valueEventListenerBuilding;
 
 
     @Override
@@ -79,6 +80,25 @@ public class ReportsActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
+        valueEventListenerBuilding = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Buildings.clear();
+                ArrayList<String> hintRooms = new ArrayList<>();
+                hintRooms.add("נא לבחור קודם את אזור התקלה");
+                Buildings.add(new Building("נא לבחור את אזור התקלה", hintRooms));
+                hintRooms = null;
+                for(DataSnapshot data : snapshot.getChildren()){
+                    Buildings.add(data.getValue(Building.class));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
 
         // יצירת רפורט רנדומלי
 
@@ -117,29 +137,14 @@ public class ReportsActivity extends AppCompatActivity {
                     }
                 }
                 else{
-                    refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            Buildings.clear();
-                            ArrayList<String> hintRooms = new ArrayList<>();
-                            hintRooms.add("נא לבחור קודם את אזור התקלה");
-                            Buildings.add(new Building("נא לבחור את אזור התקלה", hintRooms));
-                            hintRooms = null;
-                            for(DataSnapshot data : snapshot.getChildren()){
-                                Buildings.add(data.getValue(Building.class));
-                            }
-                            System.out.println(Buildings);
-                        }
+                    refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
                     refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             reporter = snapshot.child("userName").getValue(String.class);
+
                         }
 
                         @Override
@@ -161,6 +166,7 @@ public class ReportsActivity extends AppCompatActivity {
                         Report rep = data.getValue(Report.class);
                         Reports.add(rep);
                     }
+                    System.out.println(Reports + " --------------------------- ");
                     ReportRv.setAdapter(repListAdapter);
                     pd.dismiss();
 
@@ -246,5 +252,18 @@ public class ReportsActivity extends AppCompatActivity {
             alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
         }
         alertDialog.show();
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Re-attach the listener when the activity starts or resumes
+        refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Remove the listener when the activity stops or pauses
+        refOrganizations.child("organizationBuildings").removeEventListener(valueEventListenerBuilding);
     }
 }
