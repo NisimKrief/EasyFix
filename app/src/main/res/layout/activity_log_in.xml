@@ -81,16 +81,15 @@
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="303dp"
-        android:layout_height="98dp"
+        android:layout_width="167dp"
+        android:layout_height="82dp"
         android:text="Log In"
         app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.888"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.064" />
+        app:layout_constraintVertical_bias="0.063" />
 
     <CheckBox
         android:id="@+id/checkBox"
