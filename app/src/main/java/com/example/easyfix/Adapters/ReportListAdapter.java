@@ -148,7 +148,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 urgencyTV.setText("Urgency: " +Reports.get(position).getUrgencyLevel());
                 buildingTV.setText("Building: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getBuildingName());
                 areaTV.setText("Room: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getRooms().get(Reports.get(position).getMalfunctionRoom()));
-                reportDateTV.setText("Report Date: " +new SimpleDateFormat("dd/MM/yy").format(new Date(parseLong(Reports.get(position).getTimeReported()))));
+                reportDateTV.setText("Report Date: " +new SimpleDateFormat("dd/MM/yyyy").format(new Date(parseLong(Reports.get(position).getTimeReported()))));
                 workingOnTheFixTV.setText("Working On The Fix: " +Reports.get(position).getMalfunctionFixer());
 
 
