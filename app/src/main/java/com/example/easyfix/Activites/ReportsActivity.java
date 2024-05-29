@@ -9,8 +9,13 @@ import static com.example.easyfix.FBref.refUsers;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +23,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -45,8 +54,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 public class ReportsActivity extends AppCompatActivity {
@@ -62,6 +76,12 @@ public class ReportsActivity extends AppCompatActivity {
     String reporter;
     ProgressDialog pd;
     ValueEventListener valueEventListenerBuilding;
+    ImageView image;
+    String stringPhotoTime;
+    private StorageReference storageRef;
+    private StorageReference imageRef;
+    Bitmap photo;
+    public static final int OPEN_CAMERA_REQUEST = 10;
 
 
     @Override
@@ -99,6 +119,7 @@ public class ReportsActivity extends AppCompatActivity {
 
             }
         };
+        storageRef = FirebaseStorage.getInstance().getReference();
 
         // יצירת רפורט רנדומלי
 
@@ -226,24 +247,66 @@ public class ReportsActivity extends AppCompatActivity {
         });
         spinBuilding.setAdapter(new ArrayAdapterBuilding(this, Buildings));
         Button Enter = dialogView.findViewById(R.id.reportEnter);
+        image = dialogView.findViewById(R.id.reportImageView);
         EditText reportTitle = (EditText) dialogView.findViewById(R.id.repTitle);
         EditText reportDescription = (EditText) dialogView.findViewById(R.id.repDesc);
 
-        Enter.setOnClickListener(new View.OnClickListener() {
+
+
+        image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.CAMERA}, OPEN_CAMERA_REQUEST);
+                } else {
+                    openCamera();
+                }
+            }
+        });
+        Enter.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                stringPhotoTime = "Null";
+                pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "",true);
+                if (photo != null) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    photo.compress(CompressFormat.JPEG, 100, baos);
+
+                    byte[] imageData = baos.toByteArray();
+                    long PhotoTime = System.currentTimeMillis();
+                    imageRef = storageRef.child("imagesfromcamera/" + PhotoTime + ".jpg");
+                    stringPhotoTime = String.valueOf(PhotoTime);
+
+                    // Upload the image data to Firebase Storage
+                    UploadTask uploadTask = imageRef.putBytes(imageData);
+                    uploadTask.addOnSuccessListener(taskSnapshot -> {
+                        // Image uploaded successfully
+                        Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(e -> {
+                        // Handle unsuccessful uploads
+                        Toast.makeText(ReportsActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                    });
+
+                }
+
+                pd.dismiss();
                 // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
                 //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
                 DatabaseReference reportsRef = refReports;
+
                 Report report = new Report(
                         reporter, // reporter
                         reportTitle.getText().toString(), // reportMainType
                         spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea (you can set this based on your requirements) (מחסירים באחד כי יש את הראשון שהוא דמה)
                         spinRooms.getSelectedItemPosition(), // malfunctionRoom
                         String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
-                        reportDescription.getText().toString() // extraInformation
+                        reportDescription.getText().toString(), // extraInformation
+                        stringPhotoTime // reportPhoto, use that string to find the image
                 );
                 reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+                pd.dismiss();
+                photo = null;
                 alertDialog.dismiss();
             }
         });
@@ -266,4 +329,68 @@ public class ReportsActivity extends AppCompatActivity {
         // Remove the listener when the activity stops or pauses
         refOrganizations.child("organizationBuildings").removeEventListener(valueEventListenerBuilding);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == OPEN_CAMERA_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                openCamera();
+            } else {
+                // Permission denied
+                boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA);
+                if (!showRationale) {
+                    // User selected "Don't ask again"
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Denied")
+                            .setMessage("Camera permission is necessary to take photos. Please enable it in app settings.")
+                            .setPositiveButton("Go to Settings", (dialog, which) -> {
+                                // Open app settings
+                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                            .create()
+                            .show();
+                } else {
+                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+    public void openCamera(){
+        Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(openCamera, OPEN_CAMERA_REQUEST);
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OPEN_CAMERA_REQUEST && resultCode == RESULT_OK && data != null) {
+            photo = (Bitmap) data.getExtras().get("data");
+            image.setImageBitmap(photo);
+
+        }
+        else {
+            Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+    /*
+
+    public void GetFromFireBase(View view) {
+        if(imageRef != null){
+            imageRef.getBytes(1920*1080).addOnSuccessListener(bytes -> {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                Image2.setImageBitmap(bitmap);
+            }).addOnFailureListener(e -> {
+                Toast.makeText(CameraActivity.this, e.getMessage().toString() , Toast.LENGTH_SHORT).show();
+            });
+        }
+        else
+            Toast.makeText(CameraActivity.this, "Couldn't find The Requested Image", Toast.LENGTH_SHORT).show();
+
+    }*/
 }

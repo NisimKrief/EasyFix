@@ -27,6 +27,7 @@ import java.util.Calendar;
 
 import com.example.easyfix.Adapters.ArrayAdapterOrganization;
 import com.example.easyfix.Classes.Organization;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,6 +37,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -67,9 +69,43 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         boolean isChecked = sP.getBoolean("doRemember", false);
-        if(currentUser != null && isChecked)
-            startActivity(new Intent(MainActivity.this, ReportsActivity.class));
+        if(currentUser != null && isChecked) {
+            pd = ProgressDialog.show(this, "Logging In...", "",true);
+            String UserUid = currentUser.getUid();
+            String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
+            Query query = refUsers.orderByChild(path).equalTo(UserUid); //מציאת ומיקוד המוסד ששל המשתמש ישר כאשר הוא מתחבר.
+            ValueEventListener valueEventListener = new ValueEventListener() {
 
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            String orgKey = snapshot1.getKey();
+                            int userLevel = snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
+                            System.out.println(userLevel);
+                            FBref fbref = new FBref();
+                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
+                            pd.dismiss();
+                            if (userLevel == 1 || userLevel == 100) {
+                                startActivity(new Intent(MainActivity.this, ReportsActivity.class));
+                            } else {
+                                startActivity(new Intent(MainActivity.this, LobbyActivity.class));
+                            }
+                        }
+
+                    } else {
+                        System.out.println("There's no User like that"); // הוא עדיין בwaitingUsers
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            query.addListenerForSingleValueEvent(valueEventListener);
+            startActivity(new Intent(MainActivity.this, ReportsActivity.class));
+        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {

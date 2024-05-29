@@ -18,25 +18,6 @@ public class Report {
     }
 
 
-    public Report(String reporter, String reportMainType, Integer malfunctionArea, Integer malfunctionRoom, String timeReported, String extraInformation) {
-        // בנאי בסיסי, עבור דיווח ללא פרטים נוספים. אם אין תיאור, יהיה ריק ExtraInformation
-
-        this.reporter = reporter;
-        ReportMainType = reportMainType;
-        MalfunctionArea = malfunctionArea;
-        MalfunctionRoom = malfunctionRoom;
-        TimeReported = timeReported;
-        ExtraInformation = extraInformation;
-        ReportPhoto = "Null"; // בנאי כאשר משתמש לא הוסיף תמונת תקלה.
-
-        UrgencyLevel = "Null"; //  ערכים אלה יתעדכנו רק כאשר טכנאי יתקן את התקלה
-        MalfunctionFixer = "Null";
-        TimeFixed = "Null";
-        FixedPhoto = "Null";
-
-
-    }
-
     public Report(String reporter, String reportMainType, Integer malfunctionArea, Integer malfunctionRoom, String timeReported, String extraInformation, String reportPhoto) {
         // בנאי מלא, עבור מדווח, בתוספת תמונה של התקלה, אם אין תיאור, יהיה ריק ExtraInformation.
         this.reporter = reporter;
