@@ -14,12 +14,12 @@ public class Report {
     private String FixedPhoto; // Photo of the Fixed Problem
 
     public Report() {
-        // בנאי ריק.
+
     }
 
 
     public Report(String reporter, String reportMainType, Integer malfunctionArea, Integer malfunctionRoom, String timeReported, String extraInformation, String reportPhoto) {
-        // בנאי מלא, עבור מדווח, בתוספת תמונה של התקלה, אם אין תיאור, יהיה ריק ExtraInformation.
+        // Full Builder, if the user don't add extraInformation or photo it will be "null".
         this.reporter = reporter;
         ReportMainType = reportMainType;
         MalfunctionArea = malfunctionArea;
@@ -122,16 +122,4 @@ public class Report {
         MalfunctionRoom = malfunctionRoom;
     }
 }
-/*
-מדווח התקלה - מסוג String
-נושא התקלה - מסוג String
-דחיפות התקלה (הטכנאי מחליט) - מסוג String
-מתחם התקלה - מסוג Integer
-תאריך ושעת הדיווח -מסוג String
-תיאור התקלה (אופציונלי עבור המדווח) - מסוג String
-תמונה של התקלה (אופציונלי עבור המדווח) - מסוג String
-מי סגר את התקלה - מסוג String
-תאריך סגירת תקלה - מסוג String
-תמונת סגירת תקלה - מסוג String
 
- */

@@ -48,8 +48,8 @@ public class ArrayAdapterBuilding extends BaseAdapter {
         return rootView;
     }
     public boolean isEnabled(int position) {
-        // כך שלא יתבצע כלום כאשר ילחצו על האופציה הראשונה, אופציית הדמה.
-        return position != 0; // Assuming the hint item is at position 0
+        // Removing the option to press the first choice in the spinner (which is a hint option)
+        return position != 0;
     }
 
 }

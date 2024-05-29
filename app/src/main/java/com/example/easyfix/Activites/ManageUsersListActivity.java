@@ -63,7 +63,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userLevel = snapshot.child("userLevel").getValue(Integer.class);
                 UsersListAdapter=new UsersListAdapter(Users, userLevel);
-                Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(userLevel -1); // סינון לפי דרגה, יופיעו רק משתמשים בדרגה נמוכה יותר, מורים יראו רק תלמידים, מנהלים יראו את כולם.
+                Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(userLevel -1); // Query so a user will see only the users lower leveled than them.
                 higherUserLevel.addValueEventListener(ManageUsersListener);
             }
             ValueEventListener ManageUsersListener = new ValueEventListener() {

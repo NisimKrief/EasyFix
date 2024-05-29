@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(currentUser != null && isChecked) {
             pd = ProgressDialog.show(this, "Logging In...", "",true);
             String UserUid = currentUser.getUid();
-            String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
-            Query query = refUsers.orderByChild(path).equalTo(UserUid); //מציאת ומיקוד המוסד ששל המשתמש ישר כאשר הוא מתחבר.
+            String path = UserUid + "/uId"; // Path to the uId
+            Query query = refUsers.orderByChild(path).equalTo(UserUid); // Finding the organization the user is in.
             ValueEventListener valueEventListener = new ValueEventListener() {
 
                 @Override
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             int userLevel = snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
                             System.out.println(userLevel);
                             FBref fbref = new FBref();
-                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
+                            fbref.foundKeyId(orgKey); // Adjusting the references to the right organization
                             pd.dismiss();
                             if (userLevel == 1 || userLevel == 100) {
                                 startActivity(new Intent(MainActivity.this, ReportsActivity.class));
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
 
                     } else {
-                        System.out.println("There's no User like that"); // הוא עדיין בwaitingUsers
+                        System.out.println("There's no User like that"); // User in waitingUsers
                     }
                 }
 
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //timestamp = System.currentTimeMillis();
         //reportsRef.push().setValue(report);
 
-        // הוספת כל המוסדים הקיימים לספינר של בחירת מוסדות
+        // Adding all the available organizations to the spinner.
         ValueEventListener orgListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dS) {

@@ -81,8 +81,8 @@ public class LogInActivity extends AppCompatActivity {
                             mAuth = FirebaseAuth.getInstance();
                             FirebaseUser FUser = mAuth.getCurrentUser();
                             String UserUid = FUser.getUid();
-                            String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
-                            Query query = refUsers.orderByChild(path).equalTo(UserUid); //מציאת ומיקוד המוסד ששל המשתמש ישר כאשר הוא מתחבר.
+                            String path = UserUid + "/uId"; // Path to the uId
+                            Query query = refUsers.orderByChild(path).equalTo(UserUid); // Finding the organization the user is in.
                             ValueEventListener valueEventListener = new ValueEventListener() {
 
                                 @Override
@@ -93,7 +93,7 @@ public class LogInActivity extends AppCompatActivity {
                                             userLevel =snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
-                                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים דאטאבייס למוסד הנכון למשתמש
+                                            fbref.foundKeyId(orgKey);  // Adjusting the references to the right organization
                                             pd.dismiss();
                                             if(userLevel == 1 || userLevel == 100){
                                                 startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
@@ -104,7 +104,7 @@ public class LogInActivity extends AppCompatActivity {
                                             }
 
                                         } else {
-                                            System.out.println("There's no User like that"); // הוא עדיין בwaitingUsers
+                                            System.out.println("There's no User like that"); // User in waitingUsers
                                         }
                                 }
                                 @Override

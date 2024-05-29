@@ -20,7 +20,7 @@ public class FBref {
         refReports = refReports.child(orgKeyId);
         refReportsDone = refReportsDone.child(orgKeyId);
     }
-    public void loggedOut(){ // כאשר משתמש יוצא, לאתחל את מצביעי הפיירבייס כך שאם יתחבר למוסד אחר לא יופיע את המוסד הקודם.
+    public void loggedOut(){ //.When user logs out, update the firebase references so he will not log in to the previous organization.
         refOrganizations = FBDB.getReference("Organizations");
         refUsers = FBDB.getReference("Users");
         refWaitingUsers = FBDB.getReference("WaitingUsers");

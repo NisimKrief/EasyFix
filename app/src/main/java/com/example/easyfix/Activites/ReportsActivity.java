@@ -215,10 +215,10 @@ public class ReportsActivity extends AppCompatActivity {
     public void Logout(View view) {
         FirebaseAuth.getInstance().signOut();
         SharedPreferences.Editor editor=sP.edit();
-        editor.putBoolean("doRemember", false); // לעדכן שהמשתמש יצא וצריך לשמור כניסה מחדש
+        editor.putBoolean("doRemember", false); //  Update that the user logged out and he needs to press the checkbox again.
         editor.apply();
         FBref fbref = new FBref();
-        fbref.loggedOut(); // כאשר משתמש יוצא, לאתחל את מצביעי הפיירבייס כך שאם יתחבר למוסד אחר לא יופיע את המוסד הקודם.
+        fbref.loggedOut(); //.When user logs out, update the firebase references so he will not log in to the previous organization
         Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
         Toast.makeText(ReportsActivity.this, "Logout Successfully", Toast.LENGTH_SHORT).show();
         startActivity(intent);
