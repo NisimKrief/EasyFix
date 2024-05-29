@@ -1,14 +1,17 @@
 package com.example.easyfix.Adapters;
 
+import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Classes.Building;
@@ -24,6 +27,10 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
 
     private ArrayList<Report> Reports;
     ArrayList<Building> Buildings;
+    private Context context; // To know where to show the alertDialog.
+    private ConstraintLayout adapterConstraintLayout;
+    Spinner urgencySpinner;
+    TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportConditionTV, reportDateTV, workingOnTheFixTV;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView ReportNameTv, ReportExInfoTv, ReportAreaTv;
@@ -66,9 +73,11 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      *
      * @param taskDataset the task dataset
      */
-    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings) {
+    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings, Context context, ConstraintLayout adapterConstraintLayout) {
         this.Reports = taskDataset;
         Buildings = buildings;
+        this.context = context;
+        this.adapterConstraintLayout = adapterConstraintLayout;
     }
 
     // Create new views (invoked by the layout manager)
@@ -108,60 +117,43 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
             viewHolder.ReportExInfoTv.setTextColor(Color.parseColor("#000000"));
         }
 
-        /* viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
+        viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                PopupMenu popupMenu = new PopupMenu(view.getContext(), viewHolder.containerll);
-                popupMenu.inflate(R.menu.taskmenu);
-                popupMenu.show();
+                View dialogView = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, adapterConstraintLayout);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setView(dialogView);
+                final AlertDialog alertDialog = builder.create();
+                alertDialog.show();
 
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        if(menuItem.getItemId()==R.id.deleteMenu){
-                            FirebaseFirestore.getInstance().collection("tasks").document(taskDataset.get(position).getTaskId()).delete()
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            taskDataset.remove(position);
-                                            notifyItemRemoved(position);
-                                            Toast.makeText(view.getContext() , "Task Deleted Successfully", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                            return true;
+                urgencySpinner = (Spinner) dialogView.findViewById(R.id.urgencySpinner);
 
-                        }
-                        if(menuItem.getItemId()==R.id.confirmMenu){
+                reportTitleTV = (TextView) dialogView.findViewById(R.id.openedReportTitle);
+                reporterTV = (TextView) dialogView.findViewById(R.id.reporterLabel);
+                extraInformationTV = (TextView) dialogView.findViewById(R.id.extraInfoLabel);
+                urgencyTV = (TextView) dialogView.findViewById(R.id.urgencyLabel);
+                buildingTV = (TextView) dialogView.findViewById(R.id.buildingLabel);
+                areaTV = (TextView) dialogView.findViewById(R.id.areaLabel);
+                reportConditionTV = (TextView) dialogView.findViewById(R.id.conditionLabel);
+                reportDateTV = (TextView) dialogView.findViewById(R.id.dateTextView);
+                workingOnTheFixTV = (TextView) dialogView.findViewById(R.id.workingOnTheFixLabel);
 
-                            TaskModel completedTask = taskDataset.get(position);
-                            completedTask.setTaskStatus("COMPLETED");
-                            FirebaseFirestore.getInstance().collection("tasks").document(taskDataset.get(position).getTaskId())
-                                    .set(completedTask).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Toast.makeText(view.getContext() , "Task Marked As Completed", Toast.LENGTH_SHORT).show();
-                                            viewHolder.taskStatusTv.setText("COMPLETED");
-                                            notifyItemChanged(position);
-                                        }
-                                    });
-
-
-
-                        }
+                reportTitleTV.setText(Reports.get(position).getReportMainType());
+                reporterTV.setText("Reporter: " +Reports.get(position).getReporter());
+                extraInformationTV.setText("Extra Information: " +Reports.get(position).getExtraInformation());
+                urgencyTV.setText("Urgency: " +Reports.get(position).getUrgencyLevel());
+                buildingTV.setText("Building: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getBuildingName());
+                areaTV.setText("Room: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getRooms().get(Reports.get(position).getMalfunctionRoom()));
+                reportDateTV.setText("Report Date: " +Reports.get(position).getTimeReported());
+                workingOnTheFixTV.setText("Working On The Fix: " +Reports.get(position).getMalfunctionFixer());
 
 
 
 
-                        return false;
-                    }
-                });
 
-
-
-
-                return false;
+                return true;
             }
-        }); */
+        });
 
     }
 

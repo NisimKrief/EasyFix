@@ -81,6 +81,7 @@ public class ReportsActivity extends AppCompatActivity {
     private StorageReference storageRef;
     private StorageReference imageRef;
     Bitmap photo;
+    ConstraintLayout adapterConstraintLayout;
     public static final int OPEN_CAMERA_REQUEST = 10;
 
 
@@ -95,8 +96,9 @@ public class ReportsActivity extends AppCompatActivity {
             return insets;
         });
         pd = ProgressDialog.show(this, "Loading Reports...", "",true);
+        adapterConstraintLayout = findViewById(R.id.openedReportDialogConstraintLayout);
         ReportRv=findViewById(R.id.repListRv);
-        repListAdapter=new ReportListAdapter(Reports, Buildings);
+        repListAdapter=new ReportListAdapter(Reports, Buildings, this, adapterConstraintLayout);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
