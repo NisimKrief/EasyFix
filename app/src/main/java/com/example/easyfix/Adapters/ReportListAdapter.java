@@ -1,5 +1,7 @@
 package com.example.easyfix.Adapters;
 
+import static java.lang.Long.parseLong;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -18,7 +20,9 @@ import com.example.easyfix.Classes.Building;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * The type Task list adapter.
@@ -144,7 +148,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 urgencyTV.setText("Urgency: " +Reports.get(position).getUrgencyLevel());
                 buildingTV.setText("Building: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getBuildingName());
                 areaTV.setText("Room: " +Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getRooms().get(Reports.get(position).getMalfunctionRoom()));
-                reportDateTV.setText("Report Date: " +Reports.get(position).getTimeReported());
+                reportDateTV.setText("Report Date: " +new SimpleDateFormat("dd/MM/yy").format(new Date(parseLong(Reports.get(position).getTimeReported()))));
                 workingOnTheFixTV.setText("Working On The Fix: " +Reports.get(position).getMalfunctionFixer());
 
 
