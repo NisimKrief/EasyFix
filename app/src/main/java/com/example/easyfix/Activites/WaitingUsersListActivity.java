@@ -51,7 +51,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        pd = ProgressDialog.show(this, "Loading Reports...", "",true);
+        pd = ProgressDialog.show(this, "Loading WaitingUsers...", "",true);
         waitingUsersRv =findViewById(R.id.usersListRv);
         waitingUsersListAdapter=new WaitingUsersListAdapter(Users);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
