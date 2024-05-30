@@ -21,6 +21,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.easyfix.Classes.User;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -90,10 +91,11 @@ public class LogInActivity extends AppCompatActivity {
                                     if (snapshot.exists()) {
                                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                                             orgKey = snapshot1.getKey();
-                                            userLevel =snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
+                                            User user =snapshot1.child(UserUid).getValue(User.class);
+                                            userLevel = user.getUserLevel();
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
-                                            fbref.foundKeyId(orgKey);  // Adjusting the references to the right organization
+                                            fbref.foundKeyId(orgKey, user);  // Adjusting the references to the right organization
                                             pd.dismiss();
                                             if(userLevel == 1 || userLevel == 100){
                                                 startActivity(new Intent(LogInActivity.this, ReportsActivity.class));

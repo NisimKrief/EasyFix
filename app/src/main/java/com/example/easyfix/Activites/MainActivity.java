@@ -81,10 +81,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     if (snapshot.exists()) {
                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                             String orgKey = snapshot1.getKey();
-                            int userLevel = snapshot1.child(UserUid).child("userLevel").getValue(Integer.class);
+                            User user = snapshot1.child(UserUid).getValue(User.class);
+                            int userLevel = user.getUserLevel();
                             System.out.println(userLevel);
                             FBref fbref = new FBref();
-                            fbref.foundKeyId(orgKey); // Adjusting the references to the right organization
+                            fbref.foundKeyId(orgKey, user); // Adjusting the references to the right organization, saving orgKeyId and user.
                             pd.dismiss();
                             if (userLevel == 1 || userLevel == 100) {
                                 startActivity(new Intent(MainActivity.this, ReportsActivity.class));

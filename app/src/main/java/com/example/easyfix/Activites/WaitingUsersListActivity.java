@@ -66,34 +66,18 @@ public class WaitingUsersListActivity extends AppCompatActivity {
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(orgKeyId == null) { //במידה ולא null, המשתמש כבר נכנס לעמוד הזה ומצא את הkeyId
-                    if (snapshot.exists()) {
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                            orgKey = snapshot1.getKey();
-                            FBref fbref = new FBref();
-                            fbref.foundKeyId(orgKey); // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
-                        }
-
-
-                    } else {
-                        System.out.println("There's no User like that");
+                refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        lastYear = snapshot.child("lastYear").getValue(Integer.class);
+                        Query sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // סינון לפי שכבה, יופיעו רק משתמשים באותה השכבה
+                        sameLastYear.addValueEventListener(waitingUsersListener);
                     }
-                }
-                else{
-                    refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            lastYear = snapshot.child("lastYear").getValue(Integer.class);
-                            Query sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // סינון לפי שכבה, יופיעו רק משתמשים באותה השכבה
-                            sameLastYear.addValueEventListener(waitingUsersListener);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
                         }
                     });
-                }
+
             }
 
 

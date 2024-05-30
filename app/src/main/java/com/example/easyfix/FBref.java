@@ -1,5 +1,6 @@
 package com.example.easyfix;
 
+import com.example.easyfix.Classes.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -11,9 +12,11 @@ public class FBref {
     public static DatabaseReference refReports = FBDB.getReference("Reports");
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
     public static String orgKeyId;
+    public static User currentUser; // I use the userLevel alot so I prefer to save it manually.
 
-    public void foundKeyId(String orgKeyId){
+    public void foundKeyId(String orgKeyId, User user){
         this.orgKeyId = orgKeyId;
+        this.currentUser = user;
         refOrganizations = refOrganizations.child(orgKeyId);
         refUsers = refUsers.child(orgKeyId);
         refWaitingUsers = refWaitingUsers.child(orgKeyId);
