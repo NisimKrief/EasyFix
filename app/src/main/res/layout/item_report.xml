@@ -24,6 +24,7 @@
 
             <!-- Icon -->
             <ImageView
+                android:id="@+id/urgencyIcon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/baseline_report_gmailerrorred_24"

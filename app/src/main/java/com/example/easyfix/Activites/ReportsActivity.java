@@ -156,8 +156,8 @@ public class ReportsActivity extends AppCompatActivity {
 
                         }
                     });
-
-                    refReports.addValueEventListener(repListener);
+                    Query queryUrgency = refReports.orderByChild("urgencyLevel");
+                    queryUrgency.addValueEventListener(repListener);
             }
             ValueEventListener repListener = new ValueEventListener() {
                 @Override
@@ -360,19 +360,5 @@ public class ReportsActivity extends AppCompatActivity {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
     }
-    /*
 
-    public void GetFromFireBase(View view) {
-        if(imageRef != null){
-            imageRef.getBytes(1920*1080).addOnSuccessListener(bytes -> {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                Image2.setImageBitmap(bitmap);
-            }).addOnFailureListener(e -> {
-                Toast.makeText(CameraActivity.this, e.getMessage().toString() , Toast.LENGTH_SHORT).show();
-            });
-        }
-        else
-            Toast.makeText(CameraActivity.this, "Couldn't find The Requested Image", Toast.LENGTH_SHORT).show();
-
-    }*/
 }

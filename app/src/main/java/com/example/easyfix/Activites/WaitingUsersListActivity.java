@@ -1,6 +1,7 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
+import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
@@ -65,17 +66,16 @@ public class WaitingUsersListActivity extends AppCompatActivity {
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        lastYear = snapshot.child("lastYear").getValue(Integer.class);
-                        Query sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // סינון לפי שכבה, יופיעו רק משתמשים באותה השכבה
-                        sameLastYear.addValueEventListener(waitingUsersListener);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
+                Query sameLastYear;
+                lastYear = currentUser.getLastYear();
+                if(currentUser.getUserLevel() >= 1000){
+                    sameLastYear = refWaitingUsers.orderByChild("lastYear"); // if you are Manager or admin you should see all users.
+                }
+                else {
+                    sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // If you are teacher you should see only students within you same year
+                }
+                sameLastYear.addValueEventListener(waitingUsersListener);
+
 
             }
 
