@@ -96,8 +96,6 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
 
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
         viewHolder.ReportNameTv.setText(Reports.get(position).getReportMainType());
         viewHolder.ReportExInfoTv.setText(Reports.get(position).getExtraInformation());
         viewHolder.ReportAreaTv.setText(Buildings.get(Reports.get(position).getMalfunctionArea() + 1).getBuildingName()); // מעלים באחד בגלל שיש את הבניין דמה.
