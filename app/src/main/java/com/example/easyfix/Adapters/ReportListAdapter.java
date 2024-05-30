@@ -125,7 +125,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         urgency = Reports.get(position).getUrgencyLevel();
 
         // Set default background color (for the card view)
-        viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#E0F7FA"));
+        viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#B3E5FC"));
 
         // Check if there's someone on the job, set card color to yellow
         if (!currentReport.getMalfunctionFixer().equals("Null")) {

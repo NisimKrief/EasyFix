@@ -6,6 +6,7 @@ import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refUsers;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -82,6 +83,7 @@ public class ReportsActivity extends AppCompatActivity {
     Bitmap photo;
     ConstraintLayout adapterConstraintLayout;
     public static final int OPEN_CAMERA_REQUEST = 10;
+    public static final int OPEN_GALLERY_REQUEST = 20;
 
 
     @Override
@@ -169,7 +171,6 @@ public class ReportsActivity extends AppCompatActivity {
                         Report rep = data.getValue(Report.class);
                         Reports.add(rep);
                     }
-                    System.out.println(Reports + " --------------------------- ");
                     ReportRv.setAdapter(repListAdapter);
                     pd.dismiss();
 
@@ -238,11 +239,31 @@ public class ReportsActivity extends AppCompatActivity {
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.CAMERA}, OPEN_CAMERA_REQUEST);
-                } else {
-                    openCamera();
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(ReportsActivity.this);
+                builder.setTitle("Choose the option to add an image")
+                        .setItems(new CharSequence[]{"Open Camera", "Open Gallery"}, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0: // Open Camera
+                                        if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                            ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.CAMERA}, OPEN_CAMERA_REQUEST);
+                                        } else {
+                                            openCamera();
+                                        }
+                                        break;
+                                    case 1: // Open Gallery
+                                        if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                            System.out.println("Requesting Gallery Permissionns....");
+                                            ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, OPEN_GALLERY_REQUEST);
+                                        } else {
+                                            openGallery();
+                                        }
+                                        break;
+                                }
+                            }
+                        });
+                builder.create().show();
             }
         });
         Enter.setOnClickListener(new View.OnClickListener() {
@@ -342,16 +363,49 @@ public class ReportsActivity extends AppCompatActivity {
                 }
             }
         }
+        else if (requestCode == OPEN_GALLERY_REQUEST) {
+            System.out.println(ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE));
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                openGallery();
+            } else {
+                // Permission denied
+                boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+                if (!showRationale) {
+                    // User selected "Don't ask again"
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Denied")
+                            .setMessage("Storage permission is necessary to access the gallery. Please enable it in app settings.")
+                            .setPositiveButton("Go to Settings", (dialog, which) -> {
+                                // Open app settings
+                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                            .create()
+                            .show();
+                } else {
+                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
     public void openCamera(){
         Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(openCamera, OPEN_CAMERA_REQUEST);
 
     }
+    public void openGallery(){
+        Intent openGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(openGallery, OPEN_GALLERY_REQUEST);
+
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == OPEN_CAMERA_REQUEST && resultCode == RESULT_OK && data != null) {
+        if ((requestCode == OPEN_CAMERA_REQUEST || requestCode == OPEN_GALLERY_REQUEST)&& resultCode == RESULT_OK && data != null) {
             photo = (Bitmap) data.getExtras().get("data");
             image.setImageBitmap(photo);
 
