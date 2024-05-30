@@ -141,28 +141,11 @@ public class ReportsActivity extends AppCompatActivity {
         String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
         Query query = refUsers.orderByChild(path).equalTo(UserUid);
         //מציאת מפתח ארגון
-        ValueEventListener valueEventListener = new ValueEventListener() {
+        ValueEventListener valueEventListener = new ValueEventListener() { // I should delete this line if I have extra time.
 
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(orgKeyId == null) { //במידה ולא null, המשתמש כבר נכנס לעמוד הזה ומצא את הkeyId
-                    if (snapshot.exists()) {
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                            orgKey = snapshot1.getKey();
-                            //DatabaseReference refReports = refOrganizations.child(orgKeyId + "/Reports");
-                            FBref fbref = new FBref();
-                            fbref.foundKeyId(orgKey);  // פעולה הממקדת את המצביעים בריל טיים למוסד הנכון למשתמש
-                            refReports.addValueEventListener(repListener);
-                        }
-
-                    } else {
-                        System.out.println("There's no User like that");
-                    }
-                }
-                else{
                     refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
-
-
                     refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -177,7 +160,6 @@ public class ReportsActivity extends AppCompatActivity {
                     });
 
                     refReports.addValueEventListener(repListener);
-                }
             }
             ValueEventListener repListener = new ValueEventListener() {
                 @Override
