@@ -95,7 +95,7 @@ public class LogInActivity extends AppCompatActivity {
                                             userLevel = user.getUserLevel();
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
-                                            fbref.foundKeyId(orgKey, user);  // Adjusting the references to the right organization
+                                            fbref.foundKeyId(user);  // Adjusting the references to the right organization
                                             pd.dismiss();
                                             if(userLevel == 1 || userLevel == 100){
                                                 startActivity(new Intent(LogInActivity.this, ReportsActivity.class));

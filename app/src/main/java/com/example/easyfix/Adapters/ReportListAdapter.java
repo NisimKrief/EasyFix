@@ -32,7 +32,6 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     private ArrayList<Report> Reports;
     ArrayList<Building> Buildings;
     private Context context; // To know where to show the alertDialog.
-    private ConstraintLayout adapterConstraintLayout;
     Spinner urgencySpinner;
     TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportConditionTV, reportDateTV, workingOnTheFixTV;
 
@@ -77,11 +76,10 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      *
      * @param taskDataset the task dataset
      */
-    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings, Context context, ConstraintLayout adapterConstraintLayout) {
+    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings, Context context) {
         this.Reports = taskDataset;
         Buildings = buildings;
         this.context = context;
-        this.adapterConstraintLayout = adapterConstraintLayout;
     }
 
     // Create new views (invoked by the layout manager)
@@ -124,6 +122,8 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                View view2 = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, null);
+                ConstraintLayout adapterConstraintLayout = view2.findViewById(R.id.openedReportDialogConstraintLayout);
                 View dialogView = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, adapterConstraintLayout);
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setView(dialogView);

@@ -1,7 +1,6 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
-import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 

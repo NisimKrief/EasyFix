@@ -1,7 +1,6 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
-import static com.example.easyfix.FBref.orgKeyId;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refUsers;
@@ -96,9 +95,8 @@ public class ReportsActivity extends AppCompatActivity {
             return insets;
         });
         pd = ProgressDialog.show(this, "Loading Reports...", "",true);
-        adapterConstraintLayout = findViewById(R.id.openedReportDialogConstraintLayout);
         ReportRv=findViewById(R.id.repListRv);
-        repListAdapter=new ReportListAdapter(Reports, Buildings, this, adapterConstraintLayout);
+        repListAdapter=new ReportListAdapter(Reports, Buildings, this);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);

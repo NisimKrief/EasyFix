@@ -11,17 +11,15 @@ public class FBref {
     public static DatabaseReference refWaitingUsers = FBDB.getReference("WaitingUsers");
     public static DatabaseReference refReports = FBDB.getReference("Reports");
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
-    public static String orgKeyId;
     public static User currentUser; // I use the userLevel alot so I prefer to save it manually.
 
-    public void foundKeyId(String orgKeyId, User user){
-        this.orgKeyId = orgKeyId;
+    public void foundKeyId(User user){
         this.currentUser = user;
-        refOrganizations = refOrganizations.child(orgKeyId);
-        refUsers = refUsers.child(orgKeyId);
-        refWaitingUsers = refWaitingUsers.child(orgKeyId);
-        refReports = refReports.child(orgKeyId);
-        refReportsDone = refReportsDone.child(orgKeyId);
+        refOrganizations = refOrganizations.child(currentUser.getKeyId());
+        refUsers = refUsers.child(currentUser.getKeyId());
+        refWaitingUsers = refWaitingUsers.child(currentUser.getKeyId());
+        refReports = refReports.child(currentUser.getKeyId());
+        refReportsDone = refReportsDone.child(currentUser.getKeyId());
     }
     public void loggedOut(){ //.When user logs out, update the firebase references so he will not log in to the previous organization.
         refOrganizations = FBDB.getReference("Organizations");
@@ -29,7 +27,7 @@ public class FBref {
         refWaitingUsers = FBDB.getReference("WaitingUsers");
         refReports = FBDB.getReference("Reports");
         refReportsDone = FBDB.getReference("ReportsDone");
-        orgKeyId = "";
+        currentUser = null;
     }
 
 }
