@@ -61,6 +61,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ReportsActivity extends AppCompatActivity {
@@ -83,7 +84,7 @@ public class ReportsActivity extends AppCompatActivity {
     Bitmap photo;
     ConstraintLayout adapterConstraintLayout;
     public static final int OPEN_CAMERA_REQUEST = 10;
-    public static final int OPEN_GALLERY_REQUEST = 20;
+    public static final int OPEN_GALLERY_REQUEST = 100;
 
 
     @Override
@@ -253,12 +254,12 @@ public class ReportsActivity extends AppCompatActivity {
                                         }
                                         break;
                                     case 1: // Open Gallery
-                                        if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                        /*if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                                             System.out.println("Requesting Gallery Permissionns....");
                                             ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, OPEN_GALLERY_REQUEST);
-                                        } else {
+                                        } else { */
                                             openGallery();
-                                        }
+                                        //}
                                         break;
                                 }
                             }
@@ -273,8 +274,9 @@ public class ReportsActivity extends AppCompatActivity {
                 stringPhotoTime = "Null";
                 pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "",true);
                 if (photo != null) {
+                    Bitmap resizedPhoto = resizeBitmap(photo, 800); // Resize to 800x800
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    photo.compress(CompressFormat.JPEG, 100, baos);
+                    resizedPhoto.compress(CompressFormat.JPEG, 80, baos);
 
                     byte[] imageData = baos.toByteArray();
                     long PhotoTime = System.currentTimeMillis();
@@ -398,21 +400,40 @@ public class ReportsActivity extends AppCompatActivity {
 
     }
     public void openGallery(){
-        Intent openGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent openGallery = new Intent(Intent.ACTION_PICK);
+        openGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(openGallery, OPEN_GALLERY_REQUEST);
 
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == OPEN_CAMERA_REQUEST || requestCode == OPEN_GALLERY_REQUEST)&& resultCode == RESULT_OK && data != null) {
+        System.out.println(requestCode + " " + data);
+        if ((requestCode == OPEN_CAMERA_REQUEST)&& resultCode == RESULT_OK && data != null) {
             photo = (Bitmap) data.getExtras().get("data");
             image.setImageBitmap(photo);
 
         }
+        else if (requestCode == OPEN_GALLERY_REQUEST && data != null) {
+            Uri selectedImage = data.getData();
+            try {
+                photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                image.setImageBitmap(photo);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         else {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
+    }
+    private Bitmap resizeBitmap(Bitmap original, int maxDimension) {
+        int width = original.getWidth();
+        int height = original.getHeight();
+        float scale = ((float) maxDimension) / Math.max(width, height);
+        int newWidth = Math.round(scale * width);
+        int newHeight = Math.round(scale * height);
+        return Bitmap.createScaledBitmap(original, newWidth, newHeight, true);
     }
 
 }
