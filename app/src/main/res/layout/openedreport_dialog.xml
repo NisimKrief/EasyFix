@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/openedReportDialogConstraintLayout"
     android:layout_width="350dp"
     android:layout_height="wrap_content">
@@ -104,17 +105,6 @@
                 android:layout_marginTop="8dp"/>
 
             <TextView
-                android:id="@+id/conditionLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Report condition:"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/areaLabel"
-                android:layout_marginTop="8dp"/>
-
-            <TextView
                 android:id="@+id/dateTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -125,19 +115,20 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/conditionLabel" />
+                app:layout_constraintTop_toBottomOf="@+id/areaLabel" />
+
 
             <ImageView
                 android:id="@+id/reportImageView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:layout_marginTop="48dp"
                 android:visibility="gone"
                 android:src="@drawable/baseline_image_search_24"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.481"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dateTextView" />
-
 
             <TextView
                 android:id="@+id/workingOnTheFixLabel"
@@ -154,8 +145,8 @@
                 android:id="@+id/updateButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="60dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="34dp"
                 android:backgroundTint="#f5a623"
                 android:visibility="gone"
                 android:text="Update"
@@ -168,7 +159,7 @@
                 android:id="@+id/deleteButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="128dp"
+                android:layout_marginTop="85dp"
                 android:layout_marginEnd="88dp"
                 android:backgroundTint="#F44336"
                 android:text="Delete Report"
@@ -178,11 +169,49 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/reportImageView" />
 
+            <TextView
+                android:id="@+id/fixImageLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="124dp"
+                android:layout_marginTop="36dp"
+                android:visibility="gone"
+                android:text="Fix Image: "
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/deleteButton" />
+
+            <ImageView
+                android:id="@+id/fixImageView"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:src="@drawable/baseline_image_search_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fixImageLabel" />
+
+            <Button
+                android:id="@+id/reportFixedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#4CAF50"
+                android:text="Report Is Fixed"
+                android:visibility="gone"
+                android:textSize="14sp"
+                app:cornerRadius="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fixImageView" />
+
             <Button
                 android:id="@+id/takeJobButton"
                 android:layout_width="93dp"
                 android:layout_height="49dp"
-                android:layout_marginTop="60dp"
+                android:layout_marginTop="34dp"
                 android:layout_marginEnd="12dp"
                 android:backgroundTint="@color/black"
                 android:text="Take The Job"

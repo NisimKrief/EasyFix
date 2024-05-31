@@ -47,9 +47,9 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     ArrayList<Building> Buildings;
     private Context context; // To know where to show the alertDialog.
     Spinner urgencySpinner;
-    Button updateButton, deleteButton, takeJobButton;
-    ImageView reportImageView;
-    TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportConditionTV, reportDateTV, workingOnTheFixTV;
+    Button updateButton, deleteButton, takeJobButton, finishReportButton;
+    ImageView reportImageView, fixedImageView;
+    TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportDateTV, workingOnTheFixTV, fixedImageTV;
     private String[] urgencyLevels = {"Not set yet", "Low", "Medium", "High"};
     String urgency;
 
@@ -168,6 +168,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 updateButton = (Button) dialogView.findViewById(R.id.updateButton);
                 deleteButton = (Button) dialogView.findViewById(R.id.deleteButton);
                 takeJobButton = (Button) dialogView.findViewById(R.id.takeJobButton);
+                finishReportButton = (Button) dialogView.findViewById(R.id.reportFixedButton);
 
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(context,  android.R.layout.simple_spinner_item, urgencyLevels);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -193,6 +194,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                         takeJobButton.setVisibility(View.GONE);
                 }
                 reportImageView = (ImageView) dialogView.findViewById(R.id.reportImageView);
+                fixedImageView = (ImageView) dialogView.findViewById(R.id.fixImageView);
 
                 reportTitleTV = (TextView) dialogView.findViewById(R.id.openedReportTitle);
                 reporterTV = (TextView) dialogView.findViewById(R.id.reporterLabel);
@@ -200,9 +202,9 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 urgencyTV = (TextView) dialogView.findViewById(R.id.urgencyLabel);
                 buildingTV = (TextView) dialogView.findViewById(R.id.buildingLabel);
                 areaTV = (TextView) dialogView.findViewById(R.id.areaLabel);
-                reportConditionTV = (TextView) dialogView.findViewById(R.id.conditionLabel);
                 reportDateTV = (TextView) dialogView.findViewById(R.id.dateTextView);
                 workingOnTheFixTV = (TextView) dialogView.findViewById(R.id.workingOnTheFixLabel);
+                fixedImageTV = (TextView) dialogView.findViewById(R.id.fixImageLabel);
 
                 reportTitleTV.setText(Reports.get(position).getReportMainType());
                 reporterTV.setText("Reporter: " +currentReport.getReporter());
@@ -210,12 +212,22 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 buildingTV.setText("Building: " +Buildings.get(currentReport.getMalfunctionArea() + 1).getBuildingName());
                 areaTV.setText("Room: " +Buildings.get(currentReport.getMalfunctionArea() + 1).getRooms().get(Reports.get(position).getMalfunctionRoom()));
                 reportDateTV.setText("Report Date: " +new SimpleDateFormat("dd/MM/yyyy").format(new Date(parseLong(currentReport.getTimeReported())))); // making the date simple (dd,mm,yyyy)
-                workingOnTheFixTV.setText("Working On The Fix: " +currentReport.getMalfunctionFixer());
-
+                if(currentReport.getMalfunctionFixer().equals("Null"))
+                    workingOnTheFixTV.setText("Working On The Fix: No one yet");
+                else
+                    workingOnTheFixTV.setText("Working On The Fix: " +currentReport.getMalfunctionFixer());
                 if(!currentReport.getReportPhoto().equals("Null")){
                     System.out.println(currentReport.getReportPhoto());
                     getImageFromFireBase(currentReport.getReportPhoto(), context);
                     reportImageView.setVisibility(View.VISIBLE);
+                }
+                if(currentReport.getMalfunctionFixer().equals(currentUser.getUserName()) || !currentReport.getFixedPhoto().equals("Null")){
+                    //if the worker opens the alarmdialog or the work is finished they should see the textview and the fixed image
+                    fixedImageTV.setVisibility(View.VISIBLE);
+                    fixedImageView.setVisibility(View.VISIBLE);
+                    //but only the worker should see the "finish report" button
+                    if(currentReport.getMalfunctionFixer().equals(currentUser.getUserName()))
+                        finishReportButton.setVisibility(View.VISIBLE);
                 }
 
                 updateButton.setOnClickListener(new View.OnClickListener() {
