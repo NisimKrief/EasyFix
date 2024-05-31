@@ -186,7 +186,11 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                     urgencySpinner.setEnabled(false);
                 }
                 if(!currentReport.getMalfunctionFixer().equals("Null")){
-                    takeJobButton.setVisibility(View.GONE);
+                    if(currentReport.getMalfunctionFixer().equals(currentUser.getUserName())){
+                        takeJobButton.setText("Leave Job");
+                    }
+                    else
+                        takeJobButton.setVisibility(View.GONE);
                 }
                 reportImageView = (ImageView) dialogView.findViewById(R.id.reportImageView);
 
@@ -245,22 +249,34 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 takeJobButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(urgencySpinner.getSelectedItemPosition() == 0){
-                            Toast.makeText(context, "Please set urgency level first.", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            refReports.child(currentReport.getTimeReported()).child("malfunctionFixer").setValue(currentUser.getUserName()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        if(!currentReport.getMalfunctionFixer().equals("Null")){
+
+                            refReports.child(currentReport.getTimeReported()).child("malfunctionFixer").setValue("Null").addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                    Toast.makeText(context, "Report '" + currentReport.getReportMainType() + "' has claimed by " + currentUser.getUserName() + " Good Luck!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Successfully left '" + currentReport.getReportMainType() + "' job. ", Toast.LENGTH_LONG).show();
                                     alertDialog.dismiss();
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
-                                }
                             });
+                        }
+                        else {
+
+                            if (urgencySpinner.getSelectedItemPosition() == 0) {
+                                Toast.makeText(context, "Please set urgency level first.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                refReports.child(currentReport.getTimeReported()).child("malfunctionFixer").setValue(currentUser.getUserName()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        Toast.makeText(context, "Report '" + currentReport.getReportMainType() + "' has claimed by " + currentUser.getUserName() + " Good Luck!", Toast.LENGTH_LONG).show();
+                                        alertDialog.dismiss();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
                         }
                     }
                 });
