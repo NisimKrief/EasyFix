@@ -25,9 +25,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -51,6 +53,7 @@ import com.example.easyfix.Classes.Building;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -86,6 +89,9 @@ public class ReportsActivity extends AppCompatActivity {
     private StorageReference imageRef;
     Bitmap photo;
     ConstraintLayout adapterConstraintLayout;
+    Switch switchReportsShown;
+    Query queryUrgency;
+    FloatingActionButton addReportButton;
     public static final int OPEN_CAMERA_REQUEST = 10;
     public static final int OPEN_GALLERY_REQUEST = 100;
 
@@ -100,31 +106,16 @@ public class ReportsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        pd = ProgressDialog.show(this, "Loading Reports...", "",true);
+        if(!isFinishing())
+            pd = ProgressDialog.show(this, "Loading Reports...", "",true);
+        switchReportsShown = (Switch) findViewById(R.id.switchReportType);
         ReportRv=findViewById(R.id.repListRv);
+        addReportButton=findViewById(R.id.fab_add);
         repListAdapter=new ReportListAdapter(Reports, Buildings, this);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
-        valueEventListenerBuilding = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Buildings.clear();
-                ArrayList<String> hintRooms = new ArrayList<>();
-                hintRooms.add("נא לבחור קודם את אזור התקלה");
-                Buildings.add(new Building("נא לבחור את אזור התקלה", hintRooms));
-                hintRooms = null;
-                for(DataSnapshot data : snapshot.getChildren()){
-                    Buildings.add(data.getValue(Building.class));
-                }
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
         storageRef = FirebaseStorage.getInstance().getReference();
 
         // יצירת רפורט רנדומלי
@@ -141,6 +132,7 @@ public class ReportsActivity extends AppCompatActivity {
         Report rp = new Report();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser FUser = mAuth.getCurrentUser();
+        setupDataFetch();
         UserUid = FUser.getUid();
         String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
         Query query = refUsers.orderByChild(path).equalTo(UserUid);
@@ -163,28 +155,65 @@ public class ReportsActivity extends AppCompatActivity {
                         }
                     });
                     //add switch to choose between reports and reportDone
-                    Query queryUrgency = refReports.orderByChild("urgencyLevel");
-                    queryUrgency.addValueEventListener(repListener);
+                switchReportsShown.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            // Switch is ON, show finished reports
+                            if(!isFinishing())
+                                pd = ProgressDialog.show(ReportsActivity.this, "Switching to Finished Reports...", "",true);
+                            queryUrgency.removeEventListener(repListener);
+                            queryUrgency = null;
+                            queryUrgency = refReportsDone.orderByChild("urgencyLevel");
+                            queryUrgency.addValueEventListener(repListener);
+                            switchReportsShown.setText("Switch To Show Available Reports");
+                            addReportButton.setVisibility(View.GONE);
+                        } else {
+                            // Switch is OFF, show available reports
+                            if(!isFinishing())
+                                pd = ProgressDialog.show(ReportsActivity.this, "Switching to available Reports...", "",true);
+                            queryUrgency.removeEventListener(repListener);
+                            queryUrgency = null;
+                            queryUrgency = refReports.orderByChild("urgencyLevel");
+                            queryUrgency.addValueEventListener(repListener);
+                            switchReportsShown.setText("Switch To Show Finished Reports");
+                            addReportButton.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+                if(switchReportsShown.isChecked()) {
+                    queryUrgency = refReportsDone.orderByChild("urgencyLevel"); //if we go back to the screen and the switch is activated
+                    switchReportsShown.setText("Switch To Show Available Reports");
+                }
+                else {
+                    queryUrgency = refReports.orderByChild("urgencyLevel");
+                    switchReportsShown.setText("Switch To Show Finished Reports");
+                }
+                queryUrgency.addValueEventListener(repListener);
             }
             ValueEventListener repListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dS) {
-                    pd.dismiss();
-                    pd = ProgressDialog.show(ReportsActivity.this, "Updating Reports...", "",true);
+                    if(!isFinishing())
+                        pd.dismiss();
+                    if(!isFinishing())
+                        pd = ProgressDialog.show(ReportsActivity.this, "Updating Reports...", "",true);
                     Reports.clear();
                     for(DataSnapshot data : dS.getChildren()){
                         Report rep = data.getValue(Report.class);
                         Reports.add(rep);
                     }
                     ReportRv.setAdapter(repListAdapter);
-                    pd.dismiss();
+                    if(!isFinishing())
+                        pd.dismiss();
 
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     Log.e(TAG, "Error fetching reports", error.toException());
-                    pd.dismiss();
+                    if(!isFinishing())
+                        pd.dismiss();
 
                 }
             };
@@ -276,7 +305,8 @@ public class ReportsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 stringPhotoTime = "Null";
-                pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "",true);
+                if(!isFinishing())
+                    pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "",true);
                 if (photo != null) {
                     Bitmap resizedPhoto = resizeBitmap(photo, 800); // Resize to 800x800
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -298,8 +328,8 @@ public class ReportsActivity extends AppCompatActivity {
                     });
 
                 }
-
-                pd.dismiss();
+                if(!isFinishing())
+                    pd.dismiss();
                 // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
 
                 Report report = new Report(
@@ -312,7 +342,8 @@ public class ReportsActivity extends AppCompatActivity {
                         stringPhotoTime // reportPhoto, use that string to find the image
                 );
                 refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report);
-                pd.dismiss();
+                if(!isFinishing())
+                    pd.dismiss();
                 photo = null;
                 alertDialog.dismiss();
             }
@@ -323,19 +354,7 @@ public class ReportsActivity extends AppCompatActivity {
         }
         alertDialog.show();
     }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Re-attach the listener when the activity starts or resumes
-        refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Remove the listener when the activity stops or pauses
-        refOrganizations.child("organizationBuildings").removeEventListener(valueEventListenerBuilding);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -480,6 +499,7 @@ public class ReportsActivity extends AppCompatActivity {
             }
         }
         else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST && resultCode == RESULT_OK && data != null){
+            photo = (Bitmap) data.getExtras().get("data");
             repListAdapter.handleActivityResult(requestCode, photo, data);
         }
         else if(requestCode ==OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST && data != null){
@@ -502,6 +522,37 @@ public class ReportsActivity extends AppCompatActivity {
         int newWidth = Math.round(scale * width);
         int newHeight = Math.round(scale * height);
         return Bitmap.createScaledBitmap(original, newWidth, newHeight, true);
+    }
+    @Override
+    public void onBackPressed() {
+        // So you can't go back to register/log in without logging out
+         super.onBackPressed(); // Comment this out to disable the back button
+    }
+    private void setupDataFetch() {
+        refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Buildings.clear();
+                ArrayList<String> hintRooms = new ArrayList<>();
+                hintRooms.add("נא לבחור קודם את אזור התקלה");
+                Buildings.add(new Building("נא לבחור את אזור התקלה", hintRooms));
+                hintRooms = null;
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    Buildings.add(data.getValue(Building.class));
+                }
+                // Notify adapter about the data change
+                repListAdapter.notifyDataSetChanged();
+                if(!isFinishing())
+                    pd.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Error fetching buildings", error.toException());
+                pd.dismiss();
+                Toast.makeText(ReportsActivity.this, "Failed to load buildings", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

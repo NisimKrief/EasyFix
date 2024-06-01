@@ -22,7 +22,6 @@ public class FBref {
         refReportsDone = refReportsDone.child(currentUser.getKeyId());
     }
     public void loggedOut(){ //.When user logs out, update the firebase references so he will not log in to the previous organization.
-        System.out.println("Logged out");
         refOrganizations = FBDB.getReference("Organizations");
         refUsers = FBDB.getReference("Users");
         refWaitingUsers = FBDB.getReference("WaitingUsers");

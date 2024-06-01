@@ -9,6 +9,8 @@ import static java.lang.Long.parseLong;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,11 +18,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -69,6 +73,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     private String[] urgencyLevels = {"Not set yet", "Low", "Medium", "High"};
     String urgency;
     Bitmap photo;
+    private ProgressDialog progressDialog;
 
     public static final int REQUEST_CAMERA_PERMISSION = 200;
     public static final int OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST = 201;
@@ -157,6 +162,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 builder.setView(dialogView);
                 final AlertDialog alertDialog = builder.create();
                 alertDialog.show();
+                progressDialog = ProgressDialog.show(context, "Loading " + currentReport.getReportMainType() + " Report...", "",true);
 
                 urgencySpinner = dialogView.findViewById(R.id.urgencySpinner);
 
@@ -223,42 +229,53 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                     getImageFromFireBase(currentReport.getFixedPhoto(), context, 1);
                 }
 
-                if (!currentReport.getReportPhoto().equals("Null")) {
+                if (!currentReport.getReportPhoto().equals("Null")) { // if there's no report photo
                     getImageFromFireBase(currentReport.getReportPhoto(), context, 0);
                     reportImageView.setVisibility(View.VISIBLE);
                 }
+                else if(currentReport.getTimeFixed().equals("Null"))
+                    progressDialog.dismiss();
+
 
                 if (currentReport.getMalfunctionFixer().equals(currentUser.getUserName()) || !currentReport.getFixedPhoto().equals("Null")) {
                     fixedImageTV.setVisibility(View.VISIBLE);
                     fixedImageView.setVisibility(View.VISIBLE);
 
-                    if (currentReport.getMalfunctionFixer().equals(currentUser.getUserName()))
+                    if (currentReport.getMalfunctionFixer().equals(currentUser.getUserName()) &&  currentReport.getTimeFixed().equals("Null")) // if the report is taken by that worker he should see the button, but if the report is fixed already he shouldn't
                         finishReportButton.setVisibility(View.VISIBLE);
                 }
+
 
                 fixedImageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        builder.setTitle("Choose the option to add an image")
-                                .setItems(new CharSequence[]{"Open Camera", "Open Gallery"}, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        switch (which) {
-                                            case 0: // Open Camera
-                                                if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                                                    ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.CAMERA}, OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST);
-                                                } else {
-                                                    openCamera();
-                                                }
-                                                break;
-                                            case 1:
-                                                openGallery();
-                                                break;
+                        if(currentReport.getTimeFixed().equals("Null")) { // a worker can add fixed photo only if the report isn't fixed yet.
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            builder.setTitle("Choose the option to add an image")
+                                    .setItems(new CharSequence[]{"Open Camera", "Open Gallery"}, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which) {
+                                                case 0: // Open Camera
+                                                    if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                                        ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.CAMERA}, OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST);
+                                                    } else {
+                                                        openCamera();
+                                                    }
+                                                    break;
+                                                case 1:
+                                                    openGallery();
+                                                    break;
+                                            }
                                         }
-                                    }
-                                });
-                        builder.create().show();
+                                    });
+                            builder.create().show();
+                        }
+                        else{
+                            // if the report is fixed, by pressing the image it should open it full screen.
+                            Bitmap bitmap = ((BitmapDrawable) fixedImageView.getDrawable()).getBitmap();
+                            showImageDialog(bitmap);
+                        }
                     }
                 });
 
@@ -428,13 +445,19 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("imagesfromcamera/" + PhotoTime + ".jpg");
         imageRef.getBytes(1920 * 1080).addOnSuccessListener(bytes -> {
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            if(imageViewChoice == 0)
+            if (imageViewChoice == 0) {
                 reportImageView.setImageBitmap(bitmap);
-            else
+                reportImageView.setVisibility(View.VISIBLE);
+                reportImageView.setOnClickListener(view -> showImageDialog(bitmap));
+            }
+            else {
                 fixedImageView.setImageBitmap(bitmap);
+            }
+            progressDialog.dismiss();
 
         }).addOnFailureListener(e -> {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
         });
     }
 
@@ -465,5 +488,15 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         int newWidth = Math.round(scale * width);
         int newHeight = Math.round(scale * height);
         return Bitmap.createScaledBitmap(original, newWidth, newHeight, true);
+    }
+    private void showImageDialog(Bitmap bitmap) {
+        Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.big_image_dialog);
+
+        ImageView dialogImageView = dialog.findViewById(R.id.dialogImageView);
+        dialogImageView.setImageBitmap(bitmap);
+
+        dialog.show();
     }
 }
