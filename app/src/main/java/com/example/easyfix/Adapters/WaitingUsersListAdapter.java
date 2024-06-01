@@ -24,13 +24,14 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
     private ArrayList<User> Users;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView waitingUsersTv;
+        private final TextView waitingUsersTv, lastYearTv;
         private final CardView cardView;
         LinearLayout containerll;
 
         public ViewHolder(View view) {
             super(view);
             waitingUsersTv = view.findViewById(R.id.waitingUsersTv);
+            lastYearTv = view.findViewById(R.id.lastYearTv);
             cardView = view.findViewById(R.id.cardId);
             containerll = view.findViewById(R.id.WcontainerLL);
         }
@@ -57,6 +58,7 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
         String name = user.getUserName();
 
         viewHolder.waitingUsersTv.setText(name);
+        viewHolder.lastYearTv.setText(switchLastYear(Users.get(position).getLastYear()));
         viewHolder.containerll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -89,6 +91,51 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
     @Override
     public int getItemCount() {
         return Users.size();
+    }
+    public String switchLastYear(int lastYear) {
+        String className;
+        switch (lastYear) {
+            case 2024:
+                className = "כיתה יב";
+                break;
+            case 2025:
+                className = "כיתה יא";
+                break;
+            case 2026:
+                className = "כיתה י";
+                break;
+            case 2027:
+                className = "כיתה ט";
+                break;
+            case 2028:
+                className = "כיתה ח";
+                break;
+            case 2029:
+                className = "כיתה ז'";
+                break;
+            case 2030:
+                className = "כיתה ו'";
+                break;
+            case 2031:
+                className = "כיתה ה'";
+                break;
+            case 2032:
+                className = "כיתה ד'";
+                break;
+            case 2033:
+                className = "כיתה ג'";
+                break;
+            case 2034:
+                className = "כיתה ב'";
+                break;
+            case 2035:
+                className = "כיתה א'";
+                break;
+            default:
+                className = null; // Return null if no class has found
+                break;
+        }
+        return className;
     }
 
 }

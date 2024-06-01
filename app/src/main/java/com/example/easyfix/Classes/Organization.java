@@ -6,21 +6,32 @@ public class Organization {
     private String OrganizationName;
     private String KeyId; // מפתח מתאים של הארגון
     private ArrayList<Building> OrganizationBuildings;
+    private ArrayList<String> classesOrWorkArea;
 
     public Organization() {
     }
     public Organization(String organizationName) {
         //For the hint organization
         OrganizationName = organizationName;
+        classesOrWorkArea = new ArrayList<String>();
+        classesOrWorkArea.add("אופציות אלו יופיעו אחרי בחירת מוסד.");
 
     }
-    public Organization(String organizationName, String keyId, ArrayList<Building> organizationBuildings) {
+    public Organization(String organizationName, String keyId, ArrayList<Building> organizationBuildings, ArrayList<String> classesOrWorkArea) {
         OrganizationName = organizationName;
         KeyId = keyId;
         OrganizationBuildings = organizationBuildings;
+        this.classesOrWorkArea = classesOrWorkArea;
 
     }
 
+    public ArrayList<String> getClassesOrWorkArea() {
+        return classesOrWorkArea;
+    }
+
+    public void setClassesOrWorkArea(ArrayList<String> classesOrWorkArea) {
+        this.classesOrWorkArea = classesOrWorkArea;
+    }
 
     public String getOrganizationName() {
         return OrganizationName;
@@ -48,9 +59,3 @@ public class Organization {
 
 }
 
-/*
-שם הארגון - מסוג String
-מפתח (KeyId) - מסוג String, מתקבל מFireBase
-המתחמים של הארגון - מסוג (ArrayList(Building
-
- */
