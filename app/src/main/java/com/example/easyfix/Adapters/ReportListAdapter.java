@@ -69,7 +69,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     Spinner urgencySpinner;
     Button updateButton, deleteButton, takeJobButton, finishReportButton;
     ImageView reportImageView, fixedImageView;
-    TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportDateTV, workingOnTheFixTV, fixedImageTV;
+    TextView reportTitleTV, reporterTV, extraInformationTV, urgencyTV, buildingTV, areaTV, reportDateTV, workingOnTheFixTV, fixedImageTV, reportFixDateTV;
     private String[] urgencyLevels = {"Not set yet", "Low", "Medium", "High"};
     String urgency;
     Bitmap photo;
@@ -210,6 +210,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                 reportDateTV = dialogView.findViewById(R.id.dateTextView);
                 workingOnTheFixTV = dialogView.findViewById(R.id.workingOnTheFixLabel);
                 fixedImageTV = dialogView.findViewById(R.id.fixImageLabel);
+                reportFixDateTV = dialogView.findViewById(R.id.reportFixDateLabel);
 
                 reportTitleTV.setText(Reports.get(position).getReportMainType());
                 reporterTV.setText("Reporter: " + currentReport.getReporter());
@@ -224,9 +225,11 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                     workingOnTheFixTV.setText("Working On The Fix: " + currentReport.getMalfunctionFixer());
                 }
                 if(!currentReport.getTimeFixed().equals("Null")){
-                    // the report is fixed already, which means it should be "worked" instead of "working" and also add the fixed image
+                    // the report is fixed already, which means it should be "worked" instead of "working" and also add the fixed image and date fixed.
                     workingOnTheFixTV.setText("Worked On The Fix: " + currentReport.getMalfunctionFixer());
+                    reportFixDateTV.setVisibility(View.VISIBLE);
                     getImageFromFireBase(currentReport.getFixedPhoto(), context, 1);
+                    reportFixDateTV.setText("Report Fix Date: " + new SimpleDateFormat("dd/MM/yyyy").format(new Date(parseLong(currentReport.getTimeFixed()))));
                 }
 
                 if (!currentReport.getReportPhoto().equals("Null")) { // if there's no report photo

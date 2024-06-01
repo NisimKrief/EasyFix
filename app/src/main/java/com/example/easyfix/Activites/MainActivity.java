@@ -129,26 +129,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinClass.setAdapter(adpBeforePicking);
         spinClass.setOnItemSelectedListener(this);
         calendar = Calendar.getInstance();
+        pd = ProgressDialog.show(this, "Loading Organizations...", "", true);
         sP =getSharedPreferences("Remember",MODE_PRIVATE);
-
-        //startActivity(new Intent(MainActivity.this, ReportsActivity.class)); דילוג לצוריך דיבאגים
-        //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "0"+ "/Reports");
-        //Long timestamp = System.currentTimeMillis();
-        //reportsRef.push().setValue(report);
-        //reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw0tcgLr8oBAxTVzwXe"+ "/Reports");
-        //timestamp = System.currentTimeMillis();
-        //reportsRef.push().setValue(report);
 
         // Adding all the available organizations to the spinner.
         ValueEventListener orgListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dS) {
                 Organizations.clear();
+                Organizations.add(new Organization("נא לבחור מוסד")); // Hint organization, will tell the users to pick an organization, unpickable.
                 for(DataSnapshot data : dS.getChildren()){
                     Organization Org = data.getValue(Organization.class);
                     Organizations.add(Org);
                 }
                 spinMosad.setAdapter(new ArrayAdapterOrganization(MainActivity.this, Organizations));
+                pd.dismiss();
             }
 
             @Override
@@ -159,13 +154,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         };
         refOrganizations.addListenerForSingleValueEvent(orgListener);
-
-
-        /* Create A User
-        User user = new User();
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5WzzWbLlKwXcmglWm" + "/Users");
-
-        usersRef.push().setValue(user); */
 
         // Add organization
         /*
@@ -209,46 +197,51 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
     public void Register(View view) {
-            pd = ProgressDialog.show(this, "Trying to register...", "",true);
-            String Email = eTUser.getText().toString();
-            String Password = eTPass.getText().toString();
-            if(Password.equals(eTPass2.getText().toString())) {
-                //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
-                mAuth.createUserWithEmailAndPassword(Email, Password)
-                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    FirebaseUser fUser = mAuth.getCurrentUser();
-                                    String uId = fUser.getUid();
-                                    User user = new User(MosadStringId, uId, eTFullName.getText().toString(), (calendar.get(Calendar.YEAR) + (12 - ClassIdSelected)), ClassIdSelected);
-                                    if(user.getUserName().equals("AdminNisimDoronKrief")){
-                                        user.setUserLevel(10000);
-                                        refUsers.child(user.getKeyId()).child(uId).setValue(user);
-                                    }
-                                    else {
-                                        refWaitingUsers.child(user.getKeyId()).child(uId).setValue(user);
-                                    }
-                                    SharedPreferences.Editor editor = sP.edit();
-                                    editor.putBoolean("doRemember", rememberCheckBox.isChecked());
-                                    editor.apply();
-                                    pd.dismiss();
-                                    startActivity(new Intent(MainActivity.this, LobbyActivity.class)); // להעביר אותם למסך/לבקש מהם לחכות שיאשרו אותם.
-                                    Log.d(TAG, "RegisterWithEmailAndPassword:success");
-                                    Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-
+        pd = ProgressDialog.show(this, "Trying to register...", "", true);
+        String Email = eTUser.getText().toString();
+        String Password = eTPass.getText().toString();
+        int checkFields = checkFields(); // the count is how many fields are missing, will only proceed if all fields are filled.
+        if (checkFields == 0 &&Password.equals(eTPass2.getText().toString()) && spinMosad.getSelectedItemPosition() != 0) {
+            //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
+            mAuth.createUserWithEmailAndPassword(Email, Password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                FirebaseUser fUser = mAuth.getCurrentUser();
+                                String uId = fUser.getUid();
+                                User user = new User(MosadStringId, uId, eTFullName.getText().toString(), (calendar.get(Calendar.YEAR) + (12 - ClassIdSelected)), ClassIdSelected);
+                                if (user.getUserName().equals("AdminNisimDoronKrief")) {
+                                    user.setUserLevel(10000);
+                                    refUsers.child(user.getKeyId()).child(uId).setValue(user);
                                 } else {
-                                    pd.dismiss();
-                                    Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
-                                    Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
+                                    refWaitingUsers.child(user.getKeyId()).child(uId).setValue(user);
                                 }
+                                SharedPreferences.Editor editor = sP.edit();
+                                editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                                editor.apply();
+                                pd.dismiss();
+                                startActivity(new Intent(MainActivity.this, LobbyActivity.class)); // להעביר אותם למסך/לבקש מהם לחכות שיאשרו אותם.
+                                Log.d(TAG, "RegisterWithEmailAndPassword:success");
+                                Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+
+                            } else {
+                                pd.dismiss();
+                                Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
+                                Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
                             }
-                        });
+                        }
+                    });
+        } else {
+            pd.dismiss();
+            if(spinMosad.getSelectedItemPosition() == 0){
+                Toast.makeText(MainActivity.this, "Pick an Organization" +"\n" + "חובה לבחור מוסד", Toast.LENGTH_SHORT).show();
             }
-            else{
-                pd.dismiss();
+            if(checkFields != 0)
+                Toast.makeText(MainActivity.this, "Must Fill All Fields First", Toast.LENGTH_SHORT).show();
+            else
                 Toast.makeText(MainActivity.this, "Passwords Not Equal", Toast.LENGTH_SHORT).show();
-            }
+    }
 
         }
 
@@ -291,189 +284,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void LogInScreen(View view) {
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
     }
+    public int checkFields(){
+        int count = 0;
+        if(eTUser.getText().toString().isEmpty()){
+            eTUser.setError("This field is required");
+            count++;
+        }
+        if(eTPass.getText().toString().isEmpty()){
+            eTPass.setError("This field is required");
+            count++;
+        }
+        if(eTPass2.getText().toString().isEmpty()){
+            eTPass2.setError("This field is required");
+            count++;
+        }
+        if(eTFullName.getText().toString().isEmpty()){
+            eTFullName.setError("This field is required");
+            count++;
+        }
+        return count;
+    }
 
 }
 
-/*
-package com.example.alphaversion;
-
-import static android.content.ContentValues.TAG;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
-import android.icu.text.RelativeDateTimeFormatter;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import org.w3c.dom.Text;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-public class MainActivity extends AppCompatActivity {
-    EditText eTUser, eTPass;
-    TextView passStrength;
-    boolean PasswordGoodEnough = false;
-    private FirebaseAuth mAuth;
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null)
-            startActivity(new Intent(MainActivity.this, SecondActivity.class));
-
-    }
-    protected void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        System.out.println("trying to read: ");
-
-
-
-        eTUser = (EditText) findViewById(R.id.eTUser);
-        eTPass = (EditText) findViewById(R.id.eTPass);
-        passStrength = (TextView) findViewById(R.id.tVStrength);
-        mAuth = FirebaseAuth.getInstance();
-
-        eTPass.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                boolean CP = false;
-                try {
-                    CP = Read(eTPass.getText().toString());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                if(CP == true){
-                    passStrength.setText("Common Password");
-                    passStrength.setTextColor(getResources().getColor(R.color.Red));
-                    PasswordGoodEnough = false;
-                }
-
-                else if(eTPass.getText().length() < 6) {
-                    passStrength.setText("Low");
-                    passStrength.setTextColor(getResources().getColor(R.color.Red));
-                    PasswordGoodEnough = false;
-                }
-                    else if(eTPass.getText().length() >= 6 && eTPass.getText().length() < 8){
-                        passStrength.setText("Medium");
-                        passStrength.setTextColor(getResources().getColor(R.color.yellow));
-                        PasswordGoodEnough = true;
-
-                    }
-                    else{
-                        passStrength.setText("High");
-                        passStrength.setTextColor(getResources().getColor(R.color.green));
-                        PasswordGoodEnough = true;
-                    }
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-    }
-
-
-
-    public void Register(View view) {
-        if(PasswordGoodEnough) {
-            String Email = eTUser.getText().toString();
-            String Password = eTPass.getText().toString();
-            System.out.println(Email + " " + Password);
-            mAuth.createUserWithEmailAndPassword(Email, Password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                startActivity(new Intent(MainActivity.this, SecondActivity.class));
-                                Log.d(TAG, "RegisterWithEmailAndPassword:success");
-                                Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-        }
-        else{
-            Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
-
-        }
-    }
-
-    public void Login(View view) {
-        String Email = eTUser.getText().toString();
-        String Password = eTPass.getText().toString();
-        mAuth.signInWithEmailAndPassword(Email, Password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            startActivity(new Intent(MainActivity.this, SecondActivity.class));
-                            Toast.makeText(MainActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "signInWithEmailAndPassword:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-    public boolean Read(String Password) throws IOException {
-        InputStream is = this.getResources().openRawResource(R.raw.commonpasswords);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        String nextLine = "";
-
-        while (true) {
-            try {
-                nextLine = reader.readLine();
-                if (nextLine == null) break;
-                else{
-                    nextLine = nextLine.trim();
-                    if(nextLine.equals(Password)) {
-                        is.close();
-                        return true;
-                    }
-                }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-        is.close();
-
-        return false;
-    }
-
-}
- */

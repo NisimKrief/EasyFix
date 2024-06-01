@@ -9,7 +9,11 @@ public class Organization {
 
     public Organization() {
     }
+    public Organization(String organizationName) {
+        //For the hint organization
+        OrganizationName = organizationName;
 
+    }
     public Organization(String organizationName, String keyId, ArrayList<Building> organizationBuildings) {
         OrganizationName = organizationName;
         KeyId = keyId;

@@ -167,7 +167,6 @@ public class ReportsActivity extends AppCompatActivity {
                             queryUrgency = refReportsDone.orderByChild("urgencyLevel");
                             queryUrgency.addValueEventListener(repListener);
                             switchReportsShown.setText("Switch To Show Available Reports");
-                            addReportButton.setVisibility(View.GONE);
                         } else {
                             // Switch is OFF, show available reports
                             if(!isFinishing())
@@ -177,7 +176,6 @@ public class ReportsActivity extends AppCompatActivity {
                             queryUrgency = refReports.orderByChild("urgencyLevel");
                             queryUrgency.addValueEventListener(repListener);
                             switchReportsShown.setText("Switch To Show Finished Reports");
-                            addReportButton.setVisibility(View.VISIBLE);
                         }
                     }
                 });
@@ -206,6 +204,13 @@ public class ReportsActivity extends AppCompatActivity {
                     ReportRv.setAdapter(repListAdapter);
                     if(!isFinishing())
                         pd.dismiss();
+                    //updating the add report button after the reports are loaded
+                    if(switchReportsShown.isChecked()) {
+                        addReportButton.setVisibility(View.GONE);
+                    }
+                    else {
+                        addReportButton.setVisibility(View.VISIBLE);
+                    }
 
                 }
 

@@ -45,5 +45,9 @@ public class ArrayAdapterOrganization extends BaseAdapter {
 
         return rootView;
     }
+    public boolean isEnabled(int position) {
+        // Removing the option to press the first choice in the spinner (which is a hint option)
+        return position != 0;
+    }
 
 }
