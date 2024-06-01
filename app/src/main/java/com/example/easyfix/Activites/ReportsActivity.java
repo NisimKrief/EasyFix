@@ -1,8 +1,11 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
+import static com.example.easyfix.Adapters.ReportListAdapter.OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST;
+import static com.example.easyfix.Adapters.ReportListAdapter.OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
+import static com.example.easyfix.FBref.refReportsDone;
 import static com.example.easyfix.FBref.refUsers;
 
 import android.app.ProgressDialog;
@@ -159,6 +162,7 @@ public class ReportsActivity extends AppCompatActivity {
 
                         }
                     });
+                    //add switch to choose between reports and reportDone
                     Query queryUrgency = refReports.orderByChild("urgencyLevel");
                     queryUrgency.addValueEventListener(repListener);
             }
@@ -297,19 +301,17 @@ public class ReportsActivity extends AppCompatActivity {
 
                 pd.dismiss();
                 // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
-                //DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + orgKeyId + "/Reports");
-                DatabaseReference reportsRef = refReports;
 
                 Report report = new Report(
                         reporter, // reporter
                         reportTitle.getText().toString(), // reportMainType
-                        spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea (you can set this based on your requirements) (מחסירים באחד כי יש את הראשון שהוא דמה)
+                        spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea the minus 1 is because there's the hint building
                         spinRooms.getSelectedItemPosition(), // malfunctionRoom
                         String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
                         reportDescription.getText().toString(), // extraInformation
                         stringPhotoTime // reportPhoto, use that string to find the image
                 );
-                reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+                refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report);
                 pd.dismiss();
                 photo = null;
                 alertDialog.dismiss();
@@ -393,6 +395,60 @@ public class ReportsActivity extends AppCompatActivity {
                 }
             }
         }
+        else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                repListAdapter.openCamera();
+            } else {
+                // Permission denied
+                boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+                if (!showRationale) {
+                    // User selected "Don't ask again"
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Denied")
+                            .setMessage("Storage permission is necessary to access the gallery. Please enable it in app settings.")
+                            .setPositiveButton("Go to Settings", (dialog, which) -> {
+                                // Open app settings
+                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                            .create()
+                            .show();
+                } else {
+                    Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        else if(requestCode == OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                repListAdapter.openCamera();
+            } else {
+                // Permission denied
+                boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+                if (!showRationale) {
+                    // User selected "Don't ask again"
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Denied")
+                            .setMessage("Storage permission is necessary to access the gallery. Please enable it in app settings.")
+                            .setPositiveButton("Go to Settings", (dialog, which) -> {
+                                // Open app settings
+                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                            .create()
+                            .show();
+                } else {
+                    Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
     public void openCamera(){
         Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -423,11 +479,23 @@ public class ReportsActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST && resultCode == RESULT_OK && data != null){
+            repListAdapter.handleActivityResult(requestCode, photo, data);
+        }
+        else if(requestCode ==OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST && data != null){
+            Uri selectedImage = data.getData();
+            try {
+                photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            repListAdapter.handleActivityResult(requestCode, photo, data);
+        }
         else {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
     }
-    private Bitmap resizeBitmap(Bitmap original, int maxDimension) {
+    private Bitmap resizeBitmap(Bitmap original, int maxDimension) { // Resizing the bitmap so it will take less space (kb)
         int width = original.getWidth();
         int height = original.getHeight();
         float scale = ((float) maxDimension) / Math.max(width, height);
