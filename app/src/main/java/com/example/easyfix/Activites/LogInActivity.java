@@ -68,63 +68,76 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     public void Login(View view) {
-        pd = ProgressDialog.show(this, "Trying to log in...", "",true);
-        String Email = eTUser.getText().toString();
-        String Password = eTPass.getText().toString();
-        mAuth.signInWithEmailAndPassword(Email, Password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            SharedPreferences.Editor editor=sP.edit();
-                            editor.putBoolean("doRemember", rememberCheckBox.isChecked());
-                            editor.apply();
-                            mAuth = FirebaseAuth.getInstance();
-                            FirebaseUser FUser = mAuth.getCurrentUser();
-                            String UserUid = FUser.getUid();
-                            String path = UserUid + "/uId"; // Path to the uId
-                            Query query = refUsers.orderByChild(path).equalTo(UserUid); // Finding the organization the user is in.
-                            ValueEventListener valueEventListener = new ValueEventListener() {
+        int count = 0;
+        if (eTUser.getText().toString().isEmpty()) {
+            count++;
+            eTUser.setError("This field is required");
+        }
+        if (eTPass.getText().toString().isEmpty()) {
+            count++;
+            eTPass.setError("This field is required");
+        }
+        if (count == 0) {
+            pd = ProgressDialog.show(this, "Trying to log in...", "", true);
+            String Email = eTUser.getText().toString();
+            String Password = eTPass.getText().toString();
+            mAuth.signInWithEmailAndPassword(Email, Password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                SharedPreferences.Editor editor = sP.edit();
+                                editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                                editor.apply();
+                                mAuth = FirebaseAuth.getInstance();
+                                FirebaseUser FUser = mAuth.getCurrentUser();
+                                String UserUid = FUser.getUid();
+                                String path = UserUid + "/uId"; // Path to the uId
+                                Query query = refUsers.orderByChild(path).equalTo(UserUid); // Finding the organization the user is in.
+                                ValueEventListener valueEventListener = new ValueEventListener() {
 
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.exists()) {
-                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                            orgKey = snapshot1.getKey();
-                                            User user =snapshot1.child(UserUid).getValue(User.class);
-                                            userLevel = user.getUserLevel();
-                                            System.out.println(userLevel);
-                                            FBref fbref = new FBref();
-                                            fbref.foundKeyId(user);  // Adjusting the references to the right organization, saving user
-                                            pd.dismiss();
-                                            Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.exists()) {
+                                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                                orgKey = snapshot1.getKey();
+                                                User user = snapshot1.child(UserUid).getValue(User.class);
+                                                System.out.println(user);
+                                                userLevel = user.getUserLevel();
+                                                System.out.println(userLevel);
+                                                FBref fbref = new FBref();
+                                                fbref.foundKeyId(user);  // Adjusting the references to the right organization, saving user
+                                                pd.dismiss();
+                                                Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
                                             }
 
                                         } else {
-                                        pd.dismiss();
-                                        Toast.makeText(LogInActivity.this, "Still waiting, please ask your teacher to accept you.", Toast.LENGTH_LONG).show(); // User in waitingUsers
+                                            pd.dismiss();
+                                            Toast.makeText(LogInActivity.this, "Still waiting, please ask your teacher to accept you.", Toast.LENGTH_LONG).show(); // User in waitingUsers
                                         }
-                                }
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                                    }
 
-                                }
-                            };
-                            query.addListenerForSingleValueEvent(valueEventListener);
-                            Log.d(TAG, "signInWithEmailAndPassword:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            pd.dismiss();
-                            Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
-                            Toast.makeText(LogInActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            Toast.makeText(LogInActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
+                                    }
+                                };
+                                query.addListenerForSingleValueEvent(valueEventListener);
+                                Log.d(TAG, "signInWithEmailAndPassword:success");
+                                FirebaseUser user = mAuth.getCurrentUser();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                pd.dismiss();
+                                Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
+                                Toast.makeText(LogInActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LogInActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
 }

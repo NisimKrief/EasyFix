@@ -120,6 +120,8 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         Report currentReport = Reports.get(position);
+        System.out.println(Reports);
+        System.out.println(Buildings);
 
         viewHolder.ReportNameTv.setText(currentReport.getReportMainType());
         viewHolder.ReportExInfoTv.setText(currentReport.getExtraInformation());

@@ -129,21 +129,7 @@ public class ReportsActivity extends AppCompatActivity {
         );
         reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
         Report rp = new Report();
-        setupDataFetch();
         UserUid = currentUser.getuId();
-        refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
-        refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                reporter = snapshot.child("userName").getValue(String.class);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
         ValueEventListener repListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dS) {
@@ -156,7 +142,11 @@ public class ReportsActivity extends AppCompatActivity {
                     Report rep = data.getValue(Report.class);
                     Reports.add(rep);
                 }
-                ReportRv.setAdapter(repListAdapter);
+                if(Buildings.isEmpty()){ // if the activity didn't fetch the buildings yet, he should fetch them and then set the adapter
+                    setupDataFetch();
+                }
+                else //if he did, there's no reason to fetch the buildings again, just update the adapter.
+                    ReportRv.setAdapter(repListAdapter);
                 if(!isFinishing())
                     pd.dismiss();
                 //updating the add report button after the reports are loaded
@@ -221,6 +211,7 @@ public class ReportsActivity extends AppCompatActivity {
         Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
         Toast.makeText(ReportsActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
         startActivity(intent);
+        finish();
     }
 
     public void addReport(View view) {
@@ -339,7 +330,7 @@ public class ReportsActivity extends AppCompatActivity {
                         pd.dismiss();
 
                     Report report = new Report(
-                            reporter, // reporter
+                            currentUser.getUserName(), // reporter
                             reportTitle.getText().toString(), // reportMainType
                             spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea the minus 1 is because there's the hint building
                             spinRooms.getSelectedItemPosition(), // malfunctionRoom
@@ -531,27 +522,29 @@ public class ReportsActivity extends AppCompatActivity {
         //super.onBackPressed(); // Comment this out to disable the back button
     }
     private void setupDataFetch() {
+        System.out.println("Fetching Buildings");
         refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                System.out.println("Fetching Buildings");
                 Buildings.clear();
                 ArrayList<String> hintRooms = new ArrayList<>();
                 hintRooms.add("נא לבחור קודם את אזור התקלה");
                 Buildings.add(new Building("נא לבחור את אזור התקלה", hintRooms));
-                hintRooms = null;
                 for (DataSnapshot data : snapshot.getChildren()) {
                     Buildings.add(data.getValue(Building.class));
                 }
-                // Notify adapter about the data change
                 repListAdapter.notifyDataSetChanged();
-                if(!isFinishing())
+                if (!isFinishing())
                     pd.dismiss();
+                ReportRv.setAdapter(repListAdapter);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Error fetching buildings", error.toException());
-                pd.dismiss();
+                if (!isFinishing())
+                    pd.dismiss();
                 Toast.makeText(ReportsActivity.this, "Failed to load buildings", Toast.LENGTH_SHORT).show();
             }
         });

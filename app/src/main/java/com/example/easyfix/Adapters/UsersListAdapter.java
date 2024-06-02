@@ -1,5 +1,6 @@
 package com.example.easyfix.Adapters;
 
+import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refUsers;
 
 import android.graphics.Color;
@@ -46,9 +47,8 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
         }
     }
 
-    public UsersListAdapter(ArrayList<User> taskDataset, int userLevel) {
+    public UsersListAdapter(ArrayList<User> taskDataset) {
         this.Users = taskDataset;
-        this.userLevel = userLevel;
     }
 
     @Override
@@ -98,9 +98,9 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
             public void onClick(View view) {
                 PopupMenu popupMenu = new PopupMenu(view.getContext(), viewHolder.containerll);
                 popupMenu.inflate(R.menu.manageusersmenu);
-                if(userLevel <10000){
+                if(currentUser.getUserLevel() <10000){
                     popupMenu.getMenu().findItem(R.id.managerMenu).setVisible(false); // Disables the option to make it a manager
-                    if (userLevel < 1000) {
+                    if (currentUser.getUserLevel() < 1000) {
                         popupMenu.getMenu().findItem(R.id.teacherMenu).setVisible(false); // Disables the option to make it a teacher
                         popupMenu.getMenu().findItem(R.id.constructionWorkerMenu).setVisible(false); // DDisables the option to make it a construction worker
                     }
