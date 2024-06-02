@@ -88,17 +88,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             int userLevel = user.getUserLevel();
                             System.out.println(userLevel);
                             FBref fbref = new FBref();
-                            fbref.foundKeyId(user); // Adjusting the references to the right organization, saving orgKeyId and user.
+                            fbref.foundKeyId(user); // Adjusting the references to the right organization, saving user.
                             pd.dismiss();
-                            if (userLevel == 1 || userLevel == 100) {
-                                startActivity(new Intent(MainActivity.this, ReportsActivity.class));
-                            } else {
-                                startActivity(new Intent(MainActivity.this, LobbyActivity.class));
-                            }
+                            startActivity(new Intent(MainActivity.this, ReportsActivity.class));
                         }
 
                     } else {
-                        System.out.println("There's no User like that"); // User in waitingUsers
+                        pd.dismiss();
+                        Toast.makeText(MainActivity.this, "Still waiting, please ask your teacher to accept you.", Toast.LENGTH_LONG).show(); // User in waitingUsers
                     }
                 }
 
@@ -108,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             };
             query.addListenerForSingleValueEvent(valueEventListener);
-            startActivity(new Intent(MainActivity.this, ReportsActivity.class));
         }
     }
     @Override
@@ -345,14 +341,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 editor.putBoolean("doRemember", rememberCheckBox.isChecked());
                                 editor.apply();
                                 pd.dismiss();
-                                startActivity(new Intent(MainActivity.this, LobbyActivity.class)); // להעביר אותם למסך/לבקש מהם לחכות שיאשרו אותם.
                                 Log.d(TAG, "RegisterWithEmailAndPassword:success");
-                                Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Registered successfully! ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Wait till you get accepted in order to continue ", Toast.LENGTH_LONG).show();
 
                             } else {
                                 pd.dismiss();
                                 Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Email Already Used", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });

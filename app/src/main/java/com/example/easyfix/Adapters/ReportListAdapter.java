@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -132,7 +133,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
             viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#FFC107"));
         }
         if(!currentReport.getTimeFixed().equals("Null")) // if a report is finished it should be green
-            viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#4CAF50"));
+            viewHolder.cardView.setCardBackgroundColor(Color.parseColor("#7ED98F"));
 
         if (urgency.equals("JMedium"))
             urgency = "Medium";
@@ -155,12 +156,14 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
         viewHolder.containerll.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                View view2 = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, null);
-                ConstraintLayout adapterConstraintLayout = view2.findViewById(R.id.openedReportDialogConstraintLayout);
-                View dialogView = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, adapterConstraintLayout);
+                View dialogView = LayoutInflater.from(context).inflate(R.layout.openedreport_dialog, null);
+                ConstraintLayout adapterConstraintLayout = dialogView.findViewById(R.id.openedReportDialogConstraintLayout);
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setView(dialogView);
                 final AlertDialog alertDialog = builder.create();
+                if(alertDialog.getWindow() != null){
+                    alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+                }
                 alertDialog.show();
                 progressDialog = ProgressDialog.show(context, "Loading " + currentReport.getReportMainType() + " Report...", "",true);
 

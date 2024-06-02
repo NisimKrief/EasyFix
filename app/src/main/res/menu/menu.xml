@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/manageUsersOption" android:title="Manage Users">
+    </item>
+    <item android:id="@+id/waitingUsersOption" android:title="Waiting Users">
+    </item>
+    <item android:id="@+id/creditsOption" android:title="Credits">
+    </item>
+    <item android:id="@+id/logOutOption" android:title="Log out">
+    </item>
+</menu>

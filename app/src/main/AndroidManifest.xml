@@ -27,10 +27,6 @@
             android:screenOrientation="portrait"
             android:exported="false" />
         <activity
-            android:name=".Activites.LobbyActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
-        <activity
             android:name=".Activites.LogInActivity"
             android:screenOrientation="portrait"
             android:exported="false" />

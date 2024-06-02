@@ -95,18 +95,15 @@ public class LogInActivity extends AppCompatActivity {
                                             userLevel = user.getUserLevel();
                                             System.out.println(userLevel);
                                             FBref fbref = new FBref();
-                                            fbref.foundKeyId(user);  // Adjusting the references to the right organization
+                                            fbref.foundKeyId(user);  // Adjusting the references to the right organization, saving user
                                             pd.dismiss();
-                                            if(userLevel == 1 || userLevel == 100){
-                                                startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
-                                            }
-                                            else{
-                                                startActivity(new Intent(LogInActivity.this, LobbyActivity.class));
-                                            }
+                                            Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(LogInActivity.this, ReportsActivity.class));
                                             }
 
                                         } else {
-                                            System.out.println("There's no User like that"); // User in waitingUsers
+                                        pd.dismiss();
+                                        Toast.makeText(LogInActivity.this, "Still waiting, please ask your teacher to accept you.", Toast.LENGTH_LONG).show(); // User in waitingUsers
                                         }
                                 }
                                 @Override
@@ -115,7 +112,6 @@ public class LogInActivity extends AppCompatActivity {
                                 }
                             };
                             query.addListenerForSingleValueEvent(valueEventListener);
-                            Toast.makeText(LogInActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "signInWithEmailAndPassword:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                         } else {
@@ -124,6 +120,8 @@ public class LogInActivity extends AppCompatActivity {
                             Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
                             Toast.makeText(LogInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LogInActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+
                         }
                     }
                 });

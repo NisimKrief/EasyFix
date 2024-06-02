@@ -3,6 +3,7 @@ package com.example.easyfix.Activites;
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.Adapters.ReportListAdapter.OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST;
 import static com.example.easyfix.Adapters.ReportListAdapter.OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST;
+import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refReportsDone;
@@ -21,6 +22,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -234,7 +237,7 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
 
-    public void Logout(View view) {
+    public void Logout() {
         FirebaseAuth.getInstance().signOut();
         SharedPreferences.Editor editor=sP.edit();
         editor.putBoolean("doRemember", false); //  Update that the user logged out and he needs to press the checkbox again.
@@ -242,7 +245,7 @@ public class ReportsActivity extends AppCompatActivity {
         FBref fbref = new FBref();
         fbref.loggedOut(); //.When user logs out, update the firebase references so he will not log in to the previous organization
         Intent intent = new Intent(ReportsActivity.this, LogInActivity.class);
-        Toast.makeText(ReportsActivity.this, "Logout Successfully", Toast.LENGTH_SHORT).show();
+        Toast.makeText(ReportsActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
         startActivity(intent);
     }
 
@@ -309,48 +312,60 @@ public class ReportsActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                stringPhotoTime = "Null";
-                if(!isFinishing())
-                    pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "",true);
-                if (photo != null) {
-                    Bitmap resizedPhoto = resizeBitmap(photo, 800); // Resize to 800x800
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    resizedPhoto.compress(CompressFormat.JPEG, 80, baos);
-
-                    byte[] imageData = baos.toByteArray();
-                    long PhotoTime = System.currentTimeMillis();
-                    imageRef = storageRef.child("imagesfromcamera/" + PhotoTime + ".jpg");
-                    stringPhotoTime = String.valueOf(PhotoTime);
-
-                    // Upload the image data to Firebase Storage
-                    UploadTask uploadTask = imageRef.putBytes(imageData);
-                    uploadTask.addOnSuccessListener(taskSnapshot -> {
-                        // Image uploaded successfully
-                        Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
-                    }).addOnFailureListener(e -> {
-                        // Handle unsuccessful uploads
-                        Toast.makeText(ReportsActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
-                    });
-
+                int count = 0;
+                if(reportTitle.getText().toString().isEmpty()){
+                    reportTitle.setError("Report must have a title");
+                    count++;
                 }
-                if(!isFinishing())
-                    pd.dismiss();
-                // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
+                if(spinBuilding.getSelectedItemPosition() == 0){
+                    //its the hint building
+                    count++;
+                    Toast.makeText(ReportsActivity.this, "Must Choose Building", Toast.LENGTH_SHORT).show();
+                }
+                if(count ==0) {
+                    stringPhotoTime = "Null";
+                    if (!isFinishing())
+                        pd = ProgressDialog.show(ReportsActivity.this, "Uploading Report...", "", true);
+                    if (photo != null) {
+                        Bitmap resizedPhoto = resizeBitmap(photo, 800); // Resize to 800x800
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        resizedPhoto.compress(CompressFormat.JPEG, 80, baos);
 
-                Report report = new Report(
-                        reporter, // reporter
-                        reportTitle.getText().toString(), // reportMainType
-                        spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea the minus 1 is because there's the hint building
-                        spinRooms.getSelectedItemPosition(), // malfunctionRoom
-                        String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
-                        reportDescription.getText().toString(), // extraInformation
-                        stringPhotoTime // reportPhoto, use that string to find the image
-                );
-                refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report);
-                if(!isFinishing())
-                    pd.dismiss();
-                photo = null;
-                alertDialog.dismiss();
+                        byte[] imageData = baos.toByteArray();
+                        long PhotoTime = System.currentTimeMillis();
+                        imageRef = storageRef.child("imagesfromcamera/" + PhotoTime + ".jpg");
+                        stringPhotoTime = String.valueOf(PhotoTime);
+
+                        // Upload the image data to Firebase Storage
+                        UploadTask uploadTask = imageRef.putBytes(imageData);
+                        uploadTask.addOnSuccessListener(taskSnapshot -> {
+                            // Image uploaded successfully
+                            Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                        }).addOnFailureListener(e -> {
+                            // Handle unsuccessful uploads
+                            Toast.makeText(ReportsActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                        });
+
+                    }
+                    if (!isFinishing())
+                        pd.dismiss();
+                    // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
+
+                    Report report = new Report(
+                            reporter, // reporter
+                            reportTitle.getText().toString(), // reportMainType
+                            spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea the minus 1 is because there's the hint building
+                            spinRooms.getSelectedItemPosition(), // malfunctionRoom
+                            String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
+                            reportDescription.getText().toString(), // extraInformation
+                            stringPhotoTime // reportPhoto, use that string to find the image
+                    );
+                    refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+                    if (!isFinishing())
+                        pd.dismiss();
+                    photo = null;
+                    alertDialog.dismiss();
+                }
             }
         });
 
@@ -358,6 +373,7 @@ public class ReportsActivity extends AppCompatActivity {
             alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
         }
         alertDialog.show();
+
     }
 
 
@@ -531,7 +547,7 @@ public class ReportsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // So you can't go back to register/log in without logging out
-         super.onBackPressed(); // Comment this out to disable the back button
+        //super.onBackPressed(); // Comment this out to disable the back button
     }
     private void setupDataFetch() {
         refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding = new ValueEventListener() {
@@ -560,4 +576,38 @@ public class ReportsActivity extends AppCompatActivity {
         });
     }
 
+    public void optionsMenuClicked(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
+        if (currentUser.getUserLevel() < 10 || currentUser.getUserLevel() == 100) {
+            //if its a regular user or a construction worker he shouldn't see all the screens.
+            popupMenu.getMenu().findItem(R.id.manageUsersOption).setVisible(false);
+            popupMenu.getMenu().findItem(R.id.waitingUsersOption).setVisible(false);
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.manageUsersOption) {
+                    startActivity(new Intent(ReportsActivity.this, ManageUsersListActivity.class));
+                    return true;
+                }
+                if (id == R.id.waitingUsersOption) {
+                    startActivity(new Intent(ReportsActivity.this, WaitingUsersListActivity.class));
+                    return true;
+                }
+                if (id == R.id.creditsOption) {
+                    //startActivity(new Intent(ReportsActivity.this, creditsActivity.class)); Need to add Credits Activity.
+                    return true;
+                }
+                if (id == R.id.logOutOption) {
+                    Logout();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        popupMenu.show();
+    }
 }
