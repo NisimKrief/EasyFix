@@ -13,11 +13,16 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.easyfix.Activites.ManageUsersListActivity;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.User;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
@@ -127,7 +132,17 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
                             return true;
                         }
                         if (menuItem.getItemId() == R.id.deleteMenu) {
-                            refUsers.child(user.getuId()).removeValue();
+                            refUsers.child(user.getuId()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                 //   FBref.checkInternetConnection(ManageUsersListActivity.class);
+                                }
+                            });
                             //להוסיף טוסט הצלחה
                             return true;
                         }

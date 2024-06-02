@@ -2,6 +2,7 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.easyfix.FBref.checkInternetConnection;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     int MosadIdSelected;
     String MosadStringId;
     String ClassSelected;
-    int ClassIdSelected;
     ArrayAdapter<String> AdpMosad;
     ArrayAdapter<String> AdpMosadWorkArea;
     Calendar calendar;
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void onStart() {
         super.onStart();
+        FBref.checkInternetConnection(this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         boolean isChecked = sP.getBoolean("doRemember", false);
         if(currentUser != null && isChecked) {
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                FBref.checkInternetConnection(MainActivity.this);
                 Log.e(TAG, "Error fetching organizations", error.toException());
 
 
@@ -330,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             if (task.isSuccessful()) {
                                 FirebaseUser fUser = mAuth.getCurrentUser();
                                 String uId = fUser.getUid();
-                                User user = new User(MosadStringId, uId, eTFullName.getText().toString(), calculateLastYear((String) spinClass.getSelectedItem()), ClassIdSelected);
+                                User user = new User(MosadStringId, uId, eTFullName.getText().toString(), calculateLastYear((String) spinClass.getSelectedItem()));
                                 if (user.getUserName().equals("AdminNisimDoronKrief")) {
                                     user.setUserLevel(10000);
                                     refUsers.child(user.getKeyId()).child(uId).setValue(user);
@@ -348,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             } else {
                                 pd.dismiss();
                                 Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
+                                FBref.checkInternetConnection(MainActivity.this);
                                 Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }

@@ -45,6 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Activites.ReportsActivity;
 import com.example.easyfix.Classes.Building;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -120,8 +121,6 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         Report currentReport = Reports.get(position);
-        System.out.println(Reports);
-        System.out.println(Buildings);
 
         viewHolder.ReportNameTv.setText(currentReport.getReportMainType());
         viewHolder.ReportExInfoTv.setText(currentReport.getExtraInformation());
@@ -338,7 +337,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
+                                        FBref.checkInternetConnection(context);
                                     }
                                 });
                             }
@@ -358,7 +357,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
+                                FBref.checkInternetConnection(context);
                             }
                         });
                     }
@@ -383,6 +382,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                                 Toast.makeText(context, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                             }).addOnFailureListener(e -> {
                                 // Handle unsuccessful uploads
+                                FBref.checkInternetConnection(context);
                                 Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show();
                             });
                             currentReport.setFixedPhoto(stringPhotoTime);
@@ -400,7 +400,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                                     }).addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
+                                            FBref.checkInternetConnection(context);
                                         }
                                     });
                                     alertDialog.dismiss();
@@ -408,7 +408,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(context, "Something Failed, Please check your internet connection and try again", Toast.LENGTH_SHORT).show();
+                                    FBref.checkInternetConnection(context);
                                 }
                             });
                         }
@@ -464,6 +464,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
             progressDialog.dismiss();
 
         }).addOnFailureListener(e -> {
+            FBref.checkInternetConnection(context);
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
             progressDialog.dismiss();
         });

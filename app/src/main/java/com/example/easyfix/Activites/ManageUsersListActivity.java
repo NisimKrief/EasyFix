@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Adapters.UsersListAdapter;
 import com.example.easyfix.Classes.User;
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,6 +44,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FBref.checkInternetConnection(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_manage_users_list);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -74,6 +76,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    FBref.checkInternetConnection(ManageUsersListActivity.this);
                     Log.e(TAG, "Error fetching users", error.toException());
                     pd.dismiss();
             }

@@ -47,6 +47,7 @@ public class LogInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FBref.checkInternetConnection(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_log_in);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -130,6 +131,7 @@ public class LogInActivity extends AppCompatActivity {
                                 // If sign in fails, display a message to the user.
                                 pd.dismiss();
                                 Log.w(TAG, "signInWithCEmailAndPassword:failure", task.getException());
+                                FBref.checkInternetConnection(LogInActivity.this);
                                 Toast.makeText(LogInActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                                 Toast.makeText(LogInActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();

@@ -19,9 +19,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="5dp"
-            android:gravity="center_vertical"> <!-- Center the content vertically -->
+            android:gravity="center_vertical">
 
-            <!-- Icon on the left -->
             <ImageView
                 android:id="@+id/userIcon"
                 android:layout_width="40dp"
@@ -54,7 +53,7 @@
                     android:textStyle="normal"
                     android:textColor="@color/black"
                     android:textSize="20sp"
-                    android:layout_marginLeft="10dp"/> <!-- Add margin to the left -->
+                    android:layout_marginLeft="10dp"/>
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

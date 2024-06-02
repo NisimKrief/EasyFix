@@ -1,5 +1,11 @@
 package com.example.easyfix;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.example.easyfix.Classes.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -13,6 +19,7 @@ public class FBref {
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
     public static User currentUser; // I use the userLevel alot so I prefer to save it manually.
 
+    private static AlertDialog alertDialog;
     public void foundKeyId(User user){
         this.currentUser = user;
         refOrganizations = refOrganizations.child(currentUser.getKeyId());
@@ -28,6 +35,45 @@ public class FBref {
         refReports = FBDB.getReference("Reports");
         refReportsDone = FBDB.getReference("ReportsDone");
         currentUser = null;
+    }
+    public static void checkInternetConnection(Context context) {
+        //Checking if the user has wifi, if not, should show alertDialog.
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            if (activeNetwork  != null && activeNetwork.isConnected()) {
+                // there's internet connection, dismiss any existing dialog
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
+                    alertDialog = null;
+                }
+            } else {
+                // there's no internet connection, show alertdialog
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
+                    alertDialog = null;
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("No Internet Connection");
+                builder.setMessage("Please connect to the internet before proceeding.");
+                builder.setCancelable(false);
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Dismiss the dialog and check internet connection again
+                        if (alertDialog != null && alertDialog.isShowing()) {
+                            alertDialog.dismiss();
+                            alertDialog = null;
+                        }
+                        checkInternetConnection(context);
+                    }
+                });
+
+
+                alertDialog = builder.create();
+                alertDialog.show();
+            }
+        }
     }
 
 }

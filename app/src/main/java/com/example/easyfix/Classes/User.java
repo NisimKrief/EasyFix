@@ -4,37 +4,25 @@ public class User {
     private String uId; // מספר מפתח של המשתמש
     private String userName;
     private int LastYear; //שנת סיום למידה
-    private int ClassNumber; // מספר כיתה / אזור עבודה
     private int UserLevel; // לדוגמה עבור תלמיד 10 מורה 20.....
 
 
 
-    public User(String keyId, String uId, String userName, int lastYear, int classNumber) {
+    public User(String keyId, String uId, String userName, int lastYear) {
         KeyId = keyId;
         this.uId = uId;
         this.userName = userName;
         LastYear = lastYear;
-        ClassNumber = classNumber;
         UserLevel = 0;
     }
 
-    public User(String keyId, String uId, String userName, int lastYear, int classNumber, int userLevel) {
+    public User(String keyId, String uId, String userName, int lastYear, int userLevel) {
         KeyId = keyId;
         this.uId = uId;
         this.userName = userName;
         LastYear = lastYear;
-        ClassNumber = classNumber;
         UserLevel = userLevel;
     }
-    public User(User user1){
-        String KeyId = user1.getKeyId();
-        String uId = user1.getuId();
-        int LastYear = user1.getLastYear();
-        int ClassNumber = user1.getClassNumber();
-        int UserLevel = user1.getUserLevel();
-    }
-
-
 
     public User() {
     }
@@ -69,14 +57,6 @@ public class User {
 
     public void setLastYear(int lastYear) {
         LastYear = lastYear;
-    }
-
-    public int getClassNumber() {
-        return ClassNumber;
-    }
-
-    public void setClassNumber(int classNumber) {
-        ClassNumber = classNumber;
     }
 
     public int getUserLevel() {

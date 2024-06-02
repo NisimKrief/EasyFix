@@ -9,7 +9,12 @@ import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refReportsDone;
 import static com.example.easyfix.FBref.refUsers;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -51,6 +57,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Adapters.ArrayAdapterBuilding;
 import com.example.easyfix.Adapters.ReportListAdapter;
+import com.example.easyfix.AlarmReceiver;
 import com.example.easyfix.Classes.Building;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
@@ -69,6 +76,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class ReportsActivity extends AppCompatActivity {
     String orgKey;
@@ -98,6 +106,7 @@ public class ReportsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FBref.checkInternetConnection(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reports);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -105,6 +114,8 @@ public class ReportsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        //if(currentUser.getUserLevel()>=10)
+            //setDailyAlarm();
         if(!isFinishing())
             pd = ProgressDialog.show(this, "Loading Reports...", "",true);
         switchReportsShown = (Switch) findViewById(R.id.switchReportType);
@@ -114,6 +125,16 @@ public class ReportsActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "YOUR_CHANNEL_ID",
+                    "Channel name",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Channel description");
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }*/
 
         storageRef = FirebaseStorage.getInstance().getReference();
 
@@ -159,6 +180,7 @@ public class ReportsActivity extends AppCompatActivity {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                FBref.checkInternetConnection(ReportsActivity.this);
                 Log.e(TAG, "Error fetching reports", error.toException());
                 if(!isFinishing())
                     pd.dismiss();
@@ -167,6 +189,7 @@ public class ReportsActivity extends AppCompatActivity {
         switchReportsShown.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                FBref.checkInternetConnection(ReportsActivity.this);
                 if (isChecked) {
                     // Switch is ON, show finished reports
                     if(!isFinishing())
@@ -322,6 +345,7 @@ public class ReportsActivity extends AppCompatActivity {
                             Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                         }).addOnFailureListener(e -> {
                             // Handle unsuccessful uploads
+                            FBref.checkInternetConnection(ReportsActivity.this);
                             Toast.makeText(ReportsActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
                         });
 
@@ -476,7 +500,6 @@ public class ReportsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println(requestCode + " " + data);
         if ((requestCode == OPEN_CAMERA_REQUEST)&& resultCode == RESULT_OK && data != null) {
             photo = (Bitmap) data.getExtras().get("data");
             image.setImageBitmap(photo);
@@ -522,11 +545,9 @@ public class ReportsActivity extends AppCompatActivity {
         //super.onBackPressed(); // Comment this out to disable the back button
     }
     private void setupDataFetch() {
-        System.out.println("Fetching Buildings");
         refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                System.out.println("Fetching Buildings");
                 Buildings.clear();
                 ArrayList<String> hintRooms = new ArrayList<>();
                 hintRooms.add("נא לבחור קודם את אזור התקלה");
@@ -543,6 +564,7 @@ public class ReportsActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Error fetching buildings", error.toException());
+                FBref.checkInternetConnection(ReportsActivity.this);
                 if (!isFinishing())
                     pd.dismiss();
                 Toast.makeText(ReportsActivity.this, "Failed to load buildings", Toast.LENGTH_SHORT).show();
@@ -571,7 +593,7 @@ public class ReportsActivity extends AppCompatActivity {
                     return true;
                 }
                 if (id == R.id.creditsOption) {
-                    //startActivity(new Intent(ReportsActivity.this, creditsActivity.class)); Need to add Credits Activity.
+                    startActivity(new Intent(ReportsActivity.this, creditsActivity.class));
                     return true;
                 }
                 if (id == R.id.logOutOption) {
@@ -584,4 +606,27 @@ public class ReportsActivity extends AppCompatActivity {
 
         popupMenu.show();
     }
+    /*private void setDailyAlarm() {
+        System.out.println("Daily alarm was set");
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // Set the alarm to start at approximately 8:00 AM
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 8);
+        calendar.set(Calendar.SECOND, 0);
+
+        // If the alarm time is before the current time, add one day to the calendar
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        // Set a repeating alarm that triggers daily
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+    }*/
+
 }
