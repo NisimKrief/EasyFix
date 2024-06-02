@@ -63,9 +63,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
         Query query = refWaitingUsers.orderByChild(path).equalTo(UserUid); //  לשנות את זה לrefUsers אחרי שאני מסדר את הרמות
 
         //מציאת מפתח ארגון
-        ValueEventListener valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
                 Query sameLastYear;
                 lastYear = currentUser.getLastYear();
                 if(currentUser.getUserLevel() >= 1000){
@@ -74,12 +72,6 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                 else {
                     sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // If you are teacher you should see only students within you same year
                 }
-                sameLastYear.addValueEventListener(waitingUsersListener);
-
-
-            }
-
-
             ValueEventListener waitingUsersListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dS) {
@@ -100,14 +92,6 @@ public class WaitingUsersListActivity extends AppCompatActivity {
 
                 }
             };
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
-        query.addListenerForSingleValueEvent(valueEventListener);
-
+        sameLastYear.addValueEventListener(waitingUsersListener);
     }
 }
