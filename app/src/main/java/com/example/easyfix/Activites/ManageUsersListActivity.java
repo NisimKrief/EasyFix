@@ -3,7 +3,6 @@ package com.example.easyfix.Activites;
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refUsers;
-import static com.example.easyfix.FBref.refWaitingUsers;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -36,9 +35,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
     RecyclerView UsersRv;
     UsersListAdapter UsersListAdapter;
     String UserUid;
-    private FirebaseAuth mAuth;
     ArrayList<User> Users = new ArrayList<User>();
-    String orgKey;
     int userLevel;
     ProgressDialog pd;
 
@@ -56,9 +53,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
         UsersRv =findViewById(R.id.usersListRv);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         UsersRv.setLayoutManager(layoutManager);
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser FUser = mAuth.getCurrentUser();
-        UserUid = FUser.getUid();
+        UserUid = currentUser.getuId();
         UsersListAdapter=new UsersListAdapter(Users, userLevel);
         Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(currentUser.getUserLevel() -1); // Query so a user will see only the users lower leveled than them.
         ValueEventListener ManageUsersListener = new ValueEventListener() {

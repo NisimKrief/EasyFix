@@ -50,7 +50,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Adapters.ArrayAdapterBuilding;
-import com.example.easyfix.Adapters.ArrayAdapterOrganization;
 import com.example.easyfix.Adapters.ReportListAdapter;
 import com.example.easyfix.Classes.Building;
 import com.example.easyfix.FBref;
@@ -58,10 +57,8 @@ import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 
 import com.google.firebase.database.ValueEventListener;
@@ -74,7 +71,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ReportsActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
     String orgKey;
     ArrayList<Report> Reports = new ArrayList<Report>();
     ArrayList<Building> Buildings = new ArrayList<Building>();
@@ -133,106 +129,84 @@ public class ReportsActivity extends AppCompatActivity {
         );
         reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
         Report rp = new Report();
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser FUser = mAuth.getCurrentUser();
         setupDataFetch();
-        UserUid = FUser.getUid();
-        String path = UserUid + "/uId"; // הגעה ישירות למיקום הuId
-        Query query = refUsers.orderByChild(path).equalTo(UserUid);
-        //מציאת מפתח ארגון
-        ValueEventListener valueEventListener = new ValueEventListener() { // I should delete this line if I have extra time.
-
+        UserUid = currentUser.getuId();
+        refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
+        refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding);
-                    refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            reporter = snapshot.child("userName").getValue(String.class);
+                reporter = snapshot.child("userName").getValue(String.class);
 
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                    //add switch to choose between reports and reportDone
-                switchReportsShown.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            // Switch is ON, show finished reports
-                            if(!isFinishing())
-                                pd = ProgressDialog.show(ReportsActivity.this, "Switching to Finished Reports...", "",true);
-                            queryUrgency.removeEventListener(repListener);
-                            queryUrgency = null;
-                            queryUrgency = refReportsDone.orderByChild("urgencyLevel");
-                            queryUrgency.addValueEventListener(repListener);
-                            switchReportsShown.setText("Switch To Show Available Reports");
-                        } else {
-                            // Switch is OFF, show available reports
-                            if(!isFinishing())
-                                pd = ProgressDialog.show(ReportsActivity.this, "Switching to available Reports...", "",true);
-                            queryUrgency.removeEventListener(repListener);
-                            queryUrgency = null;
-                            queryUrgency = refReports.orderByChild("urgencyLevel");
-                            queryUrgency.addValueEventListener(repListener);
-                            switchReportsShown.setText("Switch To Show Finished Reports");
-                        }
-                    }
-                });
-                if(switchReportsShown.isChecked()) {
-                    queryUrgency = refReportsDone.orderByChild("urgencyLevel"); //if we go back to the screen and the switch is activated
-                    switchReportsShown.setText("Switch To Show Available Reports");
-                }
-                else {
-                    queryUrgency = refReports.orderByChild("urgencyLevel");
-                    switchReportsShown.setText("Switch To Show Finished Reports");
-                }
-                queryUrgency.addValueEventListener(repListener);
             }
-            ValueEventListener repListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dS) {
-                    if(!isFinishing())
-                        pd.dismiss();
-                    if(!isFinishing())
-                        pd = ProgressDialog.show(ReportsActivity.this, "Updating Reports...", "",true);
-                    Reports.clear();
-                    for(DataSnapshot data : dS.getChildren()){
-                        Report rep = data.getValue(Report.class);
-                        Reports.add(rep);
-                    }
-                    ReportRv.setAdapter(repListAdapter);
-                    if(!isFinishing())
-                        pd.dismiss();
-                    //updating the add report button after the reports are loaded
-                    if(switchReportsShown.isChecked()) {
-                        addReportButton.setVisibility(View.GONE);
-                    }
-                    else {
-                        addReportButton.setVisibility(View.VISIBLE);
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Error fetching reports", error.toException());
-                    if(!isFinishing())
-                        pd.dismiss();
-
-                }
-            };
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
+        });
+        ValueEventListener repListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dS) {
+                if(!isFinishing()){
+                    pd.dismiss();
+                    pd = ProgressDialog.show(ReportsActivity.this, "Updating Reports...", "",true);
+                }
+                Reports.clear();
+                for(DataSnapshot data : dS.getChildren()){
+                    Report rep = data.getValue(Report.class);
+                    Reports.add(rep);
+                }
+                ReportRv.setAdapter(repListAdapter);
+                if(!isFinishing())
+                    pd.dismiss();
+                //updating the add report button after the reports are loaded
+                if(switchReportsShown.isChecked()) {
+                    addReportButton.setVisibility(View.GONE);
+                }
+                else {
+                    addReportButton.setVisibility(View.VISIBLE);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Error fetching reports", error.toException());
+                if(!isFinishing())
+                    pd.dismiss();
+            }
         };
-        query.addListenerForSingleValueEvent(valueEventListener);
+        switchReportsShown.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // Switch is ON, show finished reports
+                    if(!isFinishing())
+                        pd = ProgressDialog.show(ReportsActivity.this, "Switching to Finished Reports...", "",true);
+                    queryUrgency.removeEventListener(repListener);
+                    queryUrgency = null;
+                    queryUrgency = refReportsDone.orderByChild("urgencyLevel");
+                    queryUrgency.addValueEventListener(repListener);
+                    switchReportsShown.setText("Switch To Show Available Reports");
+                } else {
+                    // Switch is OFF, show available reports
+                    if(!isFinishing())
+                        pd = ProgressDialog.show(ReportsActivity.this, "Switching to available Reports...", "",true);
+                    queryUrgency.removeEventListener(repListener);
+                    queryUrgency = null;
+                    queryUrgency = refReports.orderByChild("urgencyLevel");
+                    queryUrgency.addValueEventListener(repListener);
+                    switchReportsShown.setText("Switch To Show Finished Reports");
+                }
+            }
+        });
+        if(switchReportsShown.isChecked()) {
+            queryUrgency = refReportsDone.orderByChild("urgencyLevel"); //if we go back to the screen and the switch is activated
+            switchReportsShown.setText("Switch To Show Available Reports");
+        }
+        else {
+            queryUrgency = refReports.orderByChild("urgencyLevel");
+            switchReportsShown.setText("Switch To Show Finished Reports");
+        }
+        queryUrgency.addValueEventListener(repListener);
 
     }
 
@@ -250,19 +224,31 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
     public void addReport(View view) {
+        if (!isFinishing()) {
+            pd = ProgressDialog.show(ReportsActivity.this, "Opening add report dialog...", "", true);
+        }
+
         ConstraintLayout successConstraintLayout = findViewById(R.id.reportDialogConstraintLayout);
         View dialogView = LayoutInflater.from(ReportsActivity.this).inflate(R.layout.report_dialog, successConstraintLayout);
         AlertDialog.Builder builder = new AlertDialog.Builder(ReportsActivity.this);
         builder.setView(dialogView);
         final AlertDialog alertDialog = builder.create();
+
+        // Show the dialog and dismiss the progress dialog after it is shown
+        alertDialog.setOnShowListener(dialogInterface -> {
+            if (pd != null && pd.isShowing()) {
+                pd.dismiss();
+            }
+        });
+
+        alertDialog.show();
+
         spinBuilding = (Spinner) dialogView.findViewById(R.id.spinnerBuildings);
         Spinner spinRooms = (Spinner) dialogView.findViewById(R.id.spinnerRooms);
         spinBuilding.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 spinRooms.setAdapter(new ArrayAdapter<String>(ReportsActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, Buildings.get(position).getRooms()));
-
-
             }
 
             @Override
@@ -275,8 +261,9 @@ public class ReportsActivity extends AppCompatActivity {
         image = dialogView.findViewById(R.id.reportImageView);
         EditText reportTitle = (EditText) dialogView.findViewById(R.id.repTitle);
         EditText reportDescription = (EditText) dialogView.findViewById(R.id.repDesc);
-
-
+        if(alertDialog.getWindow() != null){
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+        }
 
         image.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -295,11 +282,11 @@ public class ReportsActivity extends AppCompatActivity {
                                         }
                                         break;
                                     case 1: // Open Gallery
-                                        /*if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                            System.out.println("Requesting Gallery Permissionns....");
-                                            ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, OPEN_GALLERY_REQUEST);
-                                        } else { */
-                                            openGallery();
+                                    /*if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                        System.out.println("Requesting Gallery Permissionns....");
+                                        ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, OPEN_GALLERY_REQUEST);
+                                    } else { */
+                                        openGallery();
                                         //}
                                         break;
                                 }
@@ -308,6 +295,7 @@ public class ReportsActivity extends AppCompatActivity {
                 builder.create().show();
             }
         });
+
         Enter.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -329,7 +317,7 @@ public class ReportsActivity extends AppCompatActivity {
                     if (photo != null) {
                         Bitmap resizedPhoto = resizeBitmap(photo, 800); // Resize to 800x800
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        resizedPhoto.compress(CompressFormat.JPEG, 80, baos);
+                        resizedPhoto.compress(Bitmap.CompressFormat.JPEG, 80, baos);
 
                         byte[] imageData = baos.toByteArray();
                         long PhotoTime = System.currentTimeMillis();
@@ -349,7 +337,6 @@ public class ReportsActivity extends AppCompatActivity {
                     }
                     if (!isFinishing())
                         pd.dismiss();
-                    // לעשות שאם אין נתונים כגון כותרת התקלה, אזור התקלה וכו, להעיר למשתמש.
 
                     Report report = new Report(
                             reporter, // reporter
@@ -368,12 +355,6 @@ public class ReportsActivity extends AppCompatActivity {
                 }
             }
         });
-
-        if(alertDialog.getWindow() != null){
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
-        }
-        alertDialog.show();
-
     }
 
 
