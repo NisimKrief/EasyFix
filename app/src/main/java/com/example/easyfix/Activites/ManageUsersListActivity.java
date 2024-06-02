@@ -1,6 +1,7 @@
 package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
+import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
@@ -58,40 +59,30 @@ public class ManageUsersListActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser FUser = mAuth.getCurrentUser();
         UserUid = FUser.getUid();
-        refUsers.child(UserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+        UsersListAdapter=new UsersListAdapter(Users, userLevel);
+        Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(currentUser.getUserLevel() -1); // Query so a user will see only the users lower leveled than them.
+        ValueEventListener ManageUsersListener = new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userLevel = snapshot.child("userLevel").getValue(Integer.class);
-                UsersListAdapter=new UsersListAdapter(Users, userLevel);
-                Query higherUserLevel = refUsers.orderByChild("userLevel").endAt(userLevel -1); // Query so a user will see only the users lower leveled than them.
-                higherUserLevel.addValueEventListener(ManageUsersListener);
-            }
-            ValueEventListener ManageUsersListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dS) {
-                    System.out.println(dS);
-                    Users.clear();
-                    for(DataSnapshot data : dS.getChildren()){
-                        User user = data.getValue(User.class);
-                        Users.add(user);
-                    }
-                    Collections.reverse(Users);
-                    UsersRv.setAdapter(UsersListAdapter);
-                    pd.dismiss();
+            public void onDataChange(@NonNull DataSnapshot dS) {
+                System.out.println(dS);
+                Users.clear();
+                for(DataSnapshot data : dS.getChildren()){
+                    User user = data.getValue(User.class);
+                    Users.add(user);
+                }
+                Collections.reverse(Users);
+                UsersRv.setAdapter(UsersListAdapter);
+                pd.dismiss();
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     Log.e(TAG, "Error fetching users", error.toException());
                     pd.dismiss();
-                }
-            };
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                pd.dismiss();
             }
-        });
+        };
+        higherUserLevel.addValueEventListener(ManageUsersListener);
+
 
     }
 }
