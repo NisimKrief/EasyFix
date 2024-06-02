@@ -94,7 +94,6 @@ public class ManageUsersListActivity extends AppCompatActivity {
                 }
                 else
                     higherUserLevel = refUsers.orderByChild("userName").startAt(newText).endAt(newText + "\uf8ff");
-                System.out.println(newText);
                 higherUserLevel.addValueEventListener(ManageUsersListener);
                 return true;
             }

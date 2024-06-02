@@ -139,5 +139,9 @@ public class LogInActivity extends AppCompatActivity {
                     });
         }
     }
+    public void onBackPressed() {
+        // So you can't go back after logging out, which may crash the application
+        //super.onBackPressed(); // Comment this out to disable the back button
+    }
 
 }

@@ -9,9 +9,6 @@
     tools:context=".Activites.WaitingUsersListActivity">
 
     <!-- EasyFix title -->
-
-    <!-- Rounded RecyclerView using CardView -->
-
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
@@ -20,33 +17,56 @@
         android:textColor="#FFFFFF"
         android:textSize="24dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022" />
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- SearchView -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchCardView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/titleTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="20dp"> <!-- Set corner radius -->
+        app:cardCornerRadius="20dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginTop="16dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/usersListRv"
+        <SearchView
+            android:id="@+id/waitingUsersSearchView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="45dp"
+            android:background="@drawable/rounded_corner"
+            android:iconifiedByDefault="false"
+            android:queryHint="Search Users Here" />
 
     </androidx.cardview.widget.CardView>
 
+    <!-- Rounded RecyclerView using CardView -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/searchCardView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="20dp">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/usersListRv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:clipToPadding="false"/>
+
+</androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

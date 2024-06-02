@@ -446,7 +446,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             throw new IllegalArgumentException("Invalid class name: " + currentClass);
         }
     }
-
-
+    public void onBackPressed() {
+        // So you can't go back after logging out, which may crash the application
+        //super.onBackPressed(); // Comment this out to disable the back button
+    }
 }
 

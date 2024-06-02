@@ -2,11 +2,13 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.currentUser;
+import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.SearchView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -34,6 +36,8 @@ public class WaitingUsersListActivity extends AppCompatActivity {
     ArrayList<User> Users = new ArrayList<User>();
     int lastYear;
     ProgressDialog pd;
+    Query sameLastYear;
+    SearchView searchWaitingUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,18 +51,13 @@ public class WaitingUsersListActivity extends AppCompatActivity {
         });
         pd = ProgressDialog.show(this, "Loading WaitingUsers...", "",true);
         waitingUsersRv =findViewById(R.id.usersListRv);
+        searchWaitingUsers=findViewById(R.id.waitingUsersSearchView);
         waitingUsersListAdapter=new WaitingUsersListAdapter(Users);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         waitingUsersRv.setLayoutManager(layoutManager);
         UserUid = currentUser.getuId();
-        Query sameLastYear;
         lastYear = currentUser.getLastYear();
-        if(currentUser.getUserLevel() >= 1000){
-            sameLastYear = refWaitingUsers.orderByChild("lastYear"); // if you are Manager or admin you should see all waiting users.
-        }
-        else {
-            sameLastYear = refWaitingUsers.orderByChild("lastYear").equalTo(lastYear); // If you are teacher you should see only students within you same year
-        }
+
         ValueEventListener waitingUsersListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dS) {
@@ -66,7 +65,11 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                 Users.clear();
                 for(DataSnapshot data : dS.getChildren()){
                     User user = data.getValue(User.class);
-                    Users.add(user);
+                    if(currentUser.getUserLevel() >=1000) // if you are Manager or admin you should see all waiting users.
+                        Users.add(user);
+                    else if(currentUser.getLastYear() == user.getLastYear()) // If you are teacher you should see only students within the same year as yours
+                        Users.add(user);
+
                 }
                 waitingUsersRv.setAdapter(waitingUsersListAdapter);
                 pd.dismiss();
@@ -76,6 +79,29 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                 Log.e(TAG, "Error fetching organizations", error.toException());
             }
         };
-        sameLastYear.addValueEventListener(waitingUsersListener);
+        searchWaitingUsers.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                sameLastYear.removeEventListener(waitingUsersListener);
+                sameLastYear = null;
+                if(newText.isEmpty()){
+                    sameLastYear = refWaitingUsers.orderByChild("lastYear");
+                    sameLastYear.addValueEventListener(waitingUsersListener);
+                }
+                else
+                    sameLastYear = refWaitingUsers.orderByChild("userName").startAt(newText).endAt(newText + "\uf8ff");
+                sameLastYear.addValueEventListener(waitingUsersListener);
+                return true;
+            }
+        });
+        if(searchWaitingUsers.getQuery().toString().isEmpty()){
+            sameLastYear = refWaitingUsers.orderByChild("lastYear");
+            sameLastYear.addValueEventListener(waitingUsersListener);
+        }
     }
 }
