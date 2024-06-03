@@ -7,23 +7,15 @@ import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refReports;
 import static com.example.easyfix.FBref.refReportsDone;
-import static com.example.easyfix.FBref.refUsers;
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -57,11 +49,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.easyfix.Adapters.ArrayAdapterBuilding;
 import com.example.easyfix.Adapters.ReportListAdapter;
-import com.example.easyfix.AlarmReceiver;
 import com.example.easyfix.Classes.Building;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.Report;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -76,7 +69,6 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class ReportsActivity extends AppCompatActivity {
     String orgKey;
@@ -114,8 +106,6 @@ public class ReportsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        //if(currentUser.getUserLevel()>=10)
-            //setDailyAlarm();
         if(!isFinishing())
             pd = ProgressDialog.show(this, "Loading Reports...", "",true);
         switchReportsShown = (Switch) findViewById(R.id.switchReportType);
@@ -296,12 +286,12 @@ public class ReportsActivity extends AppCompatActivity {
                                         }
                                         break;
                                     case 1: // Open Gallery
-                                    /*if (ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                        System.out.println("Requesting Gallery Permissionns....");
+                                    if ((ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != -1) {
+                                        //if ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) = -1, it means it doesn't ask the user for permissions.
                                         ActivityCompat.requestPermissions(ReportsActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, OPEN_GALLERY_REQUEST);
-                                    } else { */
+                                    } else {
                                         openGallery();
-                                        //}
+                                        }
                                         break;
                                 }
                             }
@@ -350,8 +340,6 @@ public class ReportsActivity extends AppCompatActivity {
                         });
 
                     }
-                    if (!isFinishing())
-                        pd.dismiss();
 
                     Report report = new Report(
                             currentUser.getUserName(), // reporter
@@ -360,9 +348,24 @@ public class ReportsActivity extends AppCompatActivity {
                             spinRooms.getSelectedItemPosition(), // malfunctionRoom
                             String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
                             reportDescription.getText().toString(), // extraInformation
-                            stringPhotoTime // reportPhoto, use that string to find the image
+                            stringPhotoTime // reportPhoto, using that string to find the image
                     );
-                    refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report);
+                    refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                            @Override
+                            public void onSuccess(Void unused) {
+                            Toast.makeText(ReportsActivity.this, "Report uploaded successfully", Toast.LENGTH_SHORT).show();
+                            if (!isFinishing())
+                                pd.dismiss();
+                        }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                if (!isFinishing())
+                                    pd.dismiss();
+                                FBref.checkInternetConnection(ReportsActivity.this);
+                            }
+                        });
                     if (!isFinishing())
                         pd.dismiss();
                     photo = null;
@@ -517,6 +520,7 @@ public class ReportsActivity extends AppCompatActivity {
         else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST && resultCode == RESULT_OK && data != null){
             photo = (Bitmap) data.getExtras().get("data");
             repListAdapter.handleActivityResult(requestCode, photo, data);
+            photo = null;
         }
         else if(requestCode ==OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST && data != null){
             Uri selectedImage = data.getData();
@@ -526,6 +530,7 @@ public class ReportsActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             repListAdapter.handleActivityResult(requestCode, photo, data);
+            photo = null;
         }
         else {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
@@ -606,27 +611,5 @@ public class ReportsActivity extends AppCompatActivity {
 
         popupMenu.show();
     }
-    /*private void setDailyAlarm() {
-        System.out.println("Daily alarm was set");
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        // Set the alarm to start at approximately 8:00 AM
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 8);
-        calendar.set(Calendar.SECOND, 0);
-
-        // If the alarm time is before the current time, add one day to the calendar
-        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-        }
-
-        // Set a repeating alarm that triggers daily
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-    }*/
 
 }

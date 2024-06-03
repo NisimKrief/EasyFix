@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             String orgKey = snapshot1.getKey();
                             User user = snapshot1.child(UserUid).getValue(User.class);
                             int userLevel = user.getUserLevel();
-                            System.out.println(userLevel);
                             FBref fbref = new FBref();
                             fbref.foundKeyId(user); // Adjusting the references to the right organization, saving user.
                             pd.dismiss();
@@ -319,42 +318,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
     public void Register(View view) {
         pd = ProgressDialog.show(this, "Trying to register...", "", true);
-        String Email = eTUser.getText().toString();
-        String Password = eTPass.getText().toString();
         int checkFields = checkFields(); // the count is how many fields are missing, will only proceed if all fields are filled.
         // if spinClass.getSelectemItem == קודם לבחור מוסד בבקשה it means its a not updated organization. (organization without classOrWorkArea
-        if (checkFields == 0 &&Password.equals(eTPass2.getText().toString()) && spinMosad.getSelectedItemPosition() != 0 && !spinClass.getSelectedItem().equals("קודם לבחור מוסד בבקשה")) {
-            //Toast.makeText(MainActivity.this, "Password Not Good Enough.", Toast.LENGTH_SHORT).show();
-            mAuth.createUserWithEmailAndPassword(Email, Password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                FirebaseUser fUser = mAuth.getCurrentUser();
-                                String uId = fUser.getUid();
-                                User user = new User(MosadStringId, uId, eTFullName.getText().toString(), calculateLastYear((String) spinClass.getSelectedItem()));
-                                if (user.getUserName().equals("AdminNisimDoronKrief")) {
-                                    user.setUserLevel(10000);
-                                    refUsers.child(user.getKeyId()).child(uId).setValue(user);
-                                } else {
-                                    refWaitingUsers.child(user.getKeyId()).child(uId).setValue(user);
-                                }
-                                SharedPreferences.Editor editor = sP.edit();
-                                editor.putBoolean("doRemember", rememberCheckBox.isChecked());
-                                editor.apply();
-                                pd.dismiss();
-                                Log.d(TAG, "RegisterWithEmailAndPassword:success");
-                                Toast.makeText(MainActivity.this, "Registered successfully! ", Toast.LENGTH_SHORT).show();
-                                Toast.makeText(MainActivity.this, "Wait till you get accepted in order to continue ", Toast.LENGTH_LONG).show();
-
-                            } else {
-                                pd.dismiss();
-                                Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
-                                FBref.checkInternetConnection(MainActivity.this);
-                                Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+        if (checkFields == 0 &&eTPass.getText().toString().equals(eTPass2.getText().toString()) && spinMosad.getSelectedItemPosition() != 0 && !spinClass.getSelectedItem().equals("קודם לבחור מוסד בבקשה")) {
+            //if all fields are filled, it should check if there's a user registered with this name already, if there's he should change his username
+            //but if there isn't let him proceed to the registering.
+            checkIfUserNameExists();
         } else {
             pd.dismiss();
             if(spinMosad.getSelectedItemPosition() == 0 || spinClass.getSelectedItem().equals("קודם לבחור מוסד בבקשה")){
@@ -366,8 +335,41 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 Toast.makeText(MainActivity.this, "Passwords Not Equal", Toast.LENGTH_SHORT).show();
     }
 
-        }
+    }
+    public void registerProceed(){
+        String Email = eTUser.getText().toString();
+        String Password = eTPass.getText().toString();
+        mAuth.createUserWithEmailAndPassword(Email, Password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser fUser = mAuth.getCurrentUser();
+                            String uId = fUser.getUid();
+                            User user = new User(MosadStringId, uId, eTFullName.getText().toString().trim(), calculateLastYear((String) spinClass.getSelectedItem()));
+                            if (user.getUserName().equals("AdminNisimDoronKrief")) {
+                                user.setUserLevel(10000);
+                                refUsers.child(user.getKeyId()).child(uId).setValue(user);
+                            } else {
+                                refWaitingUsers.child(user.getKeyId()).child(uId).setValue(user);
+                            }
+                            SharedPreferences.Editor editor = sP.edit();
+                            editor.putBoolean("doRemember", rememberCheckBox.isChecked());
+                            editor.apply();
+                            pd.dismiss();
+                            Log.d(TAG, "RegisterWithEmailAndPassword:success");
+                            Toast.makeText(MainActivity.this, "Registered successfully! ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Wait till you get accepted in order to continue ", Toast.LENGTH_LONG).show();
 
+                        } else {
+                            pd.dismiss();
+                            Log.w(TAG, "RegisterWithCEmailAndPassword:failure", task.getException());
+                            FBref.checkInternetConnection(MainActivity.this);
+                            Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -452,6 +454,53 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onBackPressed() {
         // So you can't go back after logging out, which may crash the application
         //super.onBackPressed(); // Comment this out to disable the back button
+    }
+    public void checkIfUserNameExists(){
+        Query queryUsers = refUsers.child(MosadStringId).orderByChild("userName").equalTo(eTFullName.getText().toString().trim());
+        Query queryWaitingUsers = refWaitingUsers.child(MosadStringId).orderByChild("userName").equalTo(eTFullName.getText().toString().trim());
+        ValueEventListener valueEventListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    //there's no user in the organization with that name, let him proceed.
+                    ValueEventListener valueEventListener2 = new ValueEventListener() {
+
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                //there's no waiting user in the organization with that name, let him proceed.
+                                System.out.println("No user with the name ");
+                                registerProceed();
+                            }
+                            else{
+                                Toast.makeText(MainActivity.this, "User with the same username exists, Please change your username", Toast.LENGTH_SHORT).show();
+                                eTFullName.setError("User with the same username exists, Please change your username");
+                                pd.dismiss();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    };
+                    queryWaitingUsers.addListenerForSingleValueEvent(valueEventListener2);
+                    System.out.println("No user with the name ");
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "User with the same username exists, Please change your username", Toast.LENGTH_SHORT).show();
+                    eTFullName.setError("User with the same username exists, Please change your username");
+                    pd.dismiss();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+        queryUsers.addListenerForSingleValueEvent(valueEventListener);
     }
 }
 

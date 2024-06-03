@@ -58,7 +58,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         UsersRv.setLayoutManager(layoutManager);
         UserUid = currentUser.getuId();
-        UsersListAdapter=new UsersListAdapter(Users);
+        UsersListAdapter=new UsersListAdapter(Users, this);
         ValueEventListener ManageUsersListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dS) {
@@ -107,6 +107,11 @@ public class ManageUsersListActivity extends AppCompatActivity {
         }
 
 
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
 }

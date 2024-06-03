@@ -49,16 +49,10 @@ public class WaitingUsersListActivity extends AppCompatActivity {
     ProgressDialog pd;
     Query sameLastYear;
     SearchView searchWaitingUsers;
-    private static final int REQUEST_NOTIFICATION_PERMISSION = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATION_PERMISSION);
-            }
-        }
                 FBref.checkInternetConnection(this);
                 EdgeToEdge.enable(this);
                 setContentView(R.layout.activity_waitingusers_list);
@@ -70,7 +64,7 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                 pd = ProgressDialog.show(this, "Loading WaitingUsers...", "", true);
                 waitingUsersRv = findViewById(R.id.usersListRv);
                 searchWaitingUsers = findViewById(R.id.waitingUsersSearchView);
-                waitingUsersListAdapter = new WaitingUsersListAdapter(Users);
+                waitingUsersListAdapter = new WaitingUsersListAdapter(Users, this);
                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
                 waitingUsersRv.setLayoutManager(layoutManager);
                 UserUid = currentUser.getuId();
@@ -127,29 +121,10 @@ public class WaitingUsersListActivity extends AppCompatActivity {
                 }
 
             }
-
-   /* public void sendNotification(){
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
-                .setSmallIcon(R.drawable.baseline_access_time_24) // Set the small icon for the notification
-                .setContentTitle("Test Notification") // Set the title of the notification
-                .setContentText("This is a test notification") // Set the content text of the notification
-                .setAutoCancel(true) // Dismiss the notification when clicked
-                .setContentIntent(pendingIntent); // Set the content intent
-
-        // Get the notification manager
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Check if Android version is Oreo or higher, and set notification channel if necessary
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("channel_id", "Channel Name", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        // Notify
-        notificationManager.notify(0, notificationBuilder.build());
-    }*/
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }
 

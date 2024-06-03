@@ -3,6 +3,7 @@ package com.example.easyfix.Adapters;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,18 +11,24 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.easyfix.FBref;
 import com.example.easyfix.R;
 import com.example.easyfix.Classes.User;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
 public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersListAdapter.ViewHolder> {
 
     private ArrayList<User> Users;
+    private Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView waitingUsersTv, lastYearTv;
@@ -41,8 +48,9 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
         }
     }
 
-    public WaitingUsersListAdapter(ArrayList<User> taskDataset) {
+    public WaitingUsersListAdapter(ArrayList<User> taskDataset, Context context) {
         this.Users = taskDataset;
+        this.context = context;
     }
 
     @Override
@@ -71,13 +79,38 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         if (menuItem.getItemId() == R.id.acceptMenu) {
                             user.setUserLevel(1);
-                            refUsers.child(user.getuId()).setValue(user);
-                            refWaitingUsers.child(user.getuId()).removeValue();
-                            // להוסיף טוסט
+                            refUsers.child(user.getuId()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    refWaitingUsers.child(user.getuId()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Toast.makeText(context, "Successfully accepted " + user.getUserName() + " to the organization", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(context, "Failed to add " + user.getUserName() + " to the organization", Toast.LENGTH_SHORT).show();
+                                    FBref.checkInternetConnection(context);
+                                }
+                            });
                             return true;
                         }
                         if (menuItem.getItemId() == R.id.deleteMenu) {
-                            refWaitingUsers.child(user.getuId()).removeValue();
+                            refWaitingUsers.child(user.getuId()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(context, "Successfully deleted " + user.getUserName(), Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(context, "Failed to delete " + user.getUserName(), Toast.LENGTH_SHORT).show();
+                                    FBref.checkInternetConnection(context);
+                                }
+                            });
                             //להוסיף טוסט הצלחה
                             return true;
                         }

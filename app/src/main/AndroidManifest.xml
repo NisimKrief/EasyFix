@@ -12,7 +12,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -27,10 +26,6 @@
         <activity
             android:name=".Activites.creditsActivity"
             android:exported="false" />
-
-        <receiver
-            android:name=".AlarmReceiver"
-            android:exported="true" />
 
         <activity
             android:name=".Activites.ManageUsersListActivity"

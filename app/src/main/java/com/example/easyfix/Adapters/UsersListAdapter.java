@@ -3,6 +3,7 @@ package com.example.easyfix.Adapters;
 import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refUsers;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.ViewHolder> {
 
     private ArrayList<User> Users;
+    private Context context;
     private int userLevel;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -52,8 +55,9 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
         }
     }
 
-    public UsersListAdapter(ArrayList<User> taskDataset) {
+    public UsersListAdapter(ArrayList<User> taskDataset, Context context) {
         this.Users = taskDataset;
+        this.context = context;
     }
 
     @Override
@@ -131,16 +135,18 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
                             refUsers.child(user.getuId()).child("userLevel").setValue(1000);
                             return true;
                         }
-                        if (menuItem.getItemId() == R.id.deleteMenu) {
+                        if (menuItem.getItemId() == R.id.deleteUserMenu) {
                             refUsers.child(user.getuId()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
+                                    Toast.makeText(context, user.getUserLevel() + "was removed successfully", Toast.LENGTH_SHORT).show();
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                 //   FBref.checkInternetConnection(ManageUsersListActivity.class);
+                                    Toast.makeText(context, "failed to remove user", Toast.LENGTH_SHORT).show();
+                                    FBref.checkInternetConnection(context);
                                 }
                             });
                             //להוסיף טוסט הצלחה

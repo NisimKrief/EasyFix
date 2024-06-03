@@ -271,7 +271,11 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                                                     }
                                                     break;
                                                 case 1:
-                                                    openGallery();
+                                                    if ((ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) != -1) {
+                                                        //if ContextCompat.checkSelfPermission(ReportsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) = -1, it means it doesn't ask the user for permissions.
+                                                    } else {
+                                                        openGallery();
+                                                    }
                                                     break;
                                             }
                                         }
@@ -403,6 +407,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                                             FBref.checkInternetConnection(context);
                                         }
                                     });
+                                    photo = null;
                                     alertDialog.dismiss();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {

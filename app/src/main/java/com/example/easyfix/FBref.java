@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.widget.Toast;
 
 import com.example.easyfix.Classes.User;
 import com.google.firebase.database.DatabaseReference;
@@ -17,7 +18,7 @@ public class FBref {
     public static DatabaseReference refWaitingUsers = FBDB.getReference("WaitingUsers");
     public static DatabaseReference refReports = FBDB.getReference("Reports");
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
-    public static User currentUser; // I use the userLevel alot so I prefer to save it manually.
+    public static User currentUser; // I use the user a big amount of times so I prefer to save it manually.
 
     private static AlertDialog alertDialog;
     public void foundKeyId(User user){
@@ -37,7 +38,7 @@ public class FBref {
         currentUser = null;
     }
     public static void checkInternetConnection(Context context) {
-        //Checking if the user has wifi, if not, should show alertDialog.
+        //Checking if the user has Internet, if not, should show alertDialog.
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
             NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
@@ -56,6 +57,7 @@ public class FBref {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("No Internet Connection");
                 builder.setMessage("Please connect to the internet before proceeding.");
+                Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show();
                 builder.setCancelable(false);
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
