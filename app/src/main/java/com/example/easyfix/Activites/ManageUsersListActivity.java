@@ -2,7 +2,6 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 import static com.example.easyfix.FBref.currentUser;
-import static com.example.easyfix.FBref.refReportsDone;
 import static com.example.easyfix.FBref.refUsers;
 
 import android.app.ProgressDialog;
@@ -28,17 +27,51 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * The Manage Users List activity.
+ * @author  Nisim Doron Krief
+ * @version	1.0
+ * @since	20/05/2024
+ * This activity allows the user to view and manage a list of users. Users can only see other users
+ * who are at a lower level than themselves. Users can also search for specific users by name.
+ * Users can only promote/demote other users level to a level lower than them (manager can set construction worker, teacher and student)
+ * while teacher can only set student,
+ * only teachers, managers and the admin can get to this activity and interact with the items.
+ */
 public class ManageUsersListActivity extends AppCompatActivity {
+    /**
+     * The RecyclerView for displaying users.
+     */
     RecyclerView UsersRv;
+    /**
+     * The users adapter for the RecyclerView.
+     */
     UsersListAdapter UsersListAdapter;
+    /**
+     * The current user's UID.
+     */
     String UserUid;
+    /**
+     * The list of users.
+     */
     ArrayList<User> Users = new ArrayList<User>();
+    /**
+     * The current user's level.
+     */
     int userLevel;
+    /**
+     * The ProgressDialog for showing loading state.
+     */
     ProgressDialog pd;
+    /**
+     * The Query for users, will sort based on userLevel and on userName.
+     */
     Query higherUserLevel;
+    /**
+     * The SearchView for searching users by their user name.
+     */
     SearchView searchUsers;
 
     @Override
@@ -108,6 +141,12 @@ public class ManageUsersListActivity extends AppCompatActivity {
 
 
     }
+    /**
+     * Called when the activity has detected the user's press of the back key.
+     * <p>
+     * This method finishes the activity when the back button is pressed, when we go back to the ReportsActivity.
+     * </p>
+     */
     @Override
     public void onBackPressed() {
         super.onBackPressed();

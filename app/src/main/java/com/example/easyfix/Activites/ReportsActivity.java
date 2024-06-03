@@ -70,28 +70,55 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * The Reports activity
+ * @author  Nisim Doron Krief
+ * @version	1.0
+ * @since	21/04/2024
+ * The Reports activity, the actual main activity of the application, it handles the display, addition, and management of reports.
+ * This activity fetches reports from the Firebase database, displays them in a RecyclerView,
+ * and allows users to add new reports with optional images from the camera or gallery.
+ * User can interact with each item based on his user level, will explain more in the ReportListAdapter.class
+ * Users can switch between viewing available and finished reports.
+ */
 public class ReportsActivity extends AppCompatActivity {
-    String orgKey;
+    /** The list of reports. (fetching from firebase) */
     ArrayList<Report> Reports = new ArrayList<Report>();
+    /** The list of buildings. (fetching from firebase) */
     ArrayList<Building> Buildings = new ArrayList<Building>();
+    /** The RecyclerView for displaying reports. */
     RecyclerView ReportRv;
+    /** The adapter for the RecyclerView. */
     ReportListAdapter repListAdapter;
+    /** SharedPreferences for editing "remember me" option when user logs out.. */
     SharedPreferences sP;
+    /** The Spinner for selecting buildings. */
     Spinner spinBuilding;
+    /** The user uID. */
     String UserUid;
-    String reporter;
+    /** ProgressDialog for interactive loading progress. */
     ProgressDialog pd;
+    /** ValueEventListener for fetching building data. */
     ValueEventListener valueEventListenerBuilding;
+    /** ImageView for displaying selected image. */
     ImageView image;
+    /** String to store photo timestamp, thats the name of the photo in firebase storage. */
     String stringPhotoTime;
+    /** Firebase Storage reference. */
     private StorageReference storageRef;
+    /** Firebase Storage reference for image. */
     private StorageReference imageRef;
+    /** Bitmap to store the photo. */
     Bitmap photo;
-    ConstraintLayout adapterConstraintLayout;
+    /** Switch for toggling between available and finished reports. */
     Switch switchReportsShown;
+    /** Query for fetching reports, sorting based on urgency. */
     Query queryUrgency;
+    /** FloatingActionButton for adding new reports. */
     FloatingActionButton addReportButton;
+    /** Request code for opening camera. */
     public static final int OPEN_CAMERA_REQUEST = 10;
+    /** Request code for opening gallery. */
     public static final int OPEN_GALLERY_REQUEST = 100;
 
 
@@ -115,31 +142,7 @@ public class ReportsActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "YOUR_CHANNEL_ID",
-                    "Channel name",
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Channel description");
-
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }*/
-
         storageRef = FirebaseStorage.getInstance().getReference();
-
-        // יצירת רפורט רנדומלי
-
-       /* DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("Organizations/" + "-Nw5X96KI_P4yGcxoN3L" + "/Reports");
-        Report report = new Report(
-                null, // reporter
-                "There's a big issue in the bathroom of class 5, when I went there I saw lots of water flooding all over the place, please fix", // reportMainType
-                1, // malfunctionArea (you can set this based on your requirements)
-                String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
-                "Please fix it as fast as possible" // extraInformation
-        );
-        reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
-        Report rp = new Report();
         UserUid = currentUser.getuId();
         ValueEventListener repListener = new ValueEventListener() {
             @Override
@@ -214,6 +217,9 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Logs out the user and redirects to the login activity.
+     */
     public void Logout() {
         FirebaseAuth.getInstance().signOut();
         SharedPreferences.Editor editor=sP.edit();
@@ -227,6 +233,18 @@ public class ReportsActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Opens the add report dialog.
+     * it contains 2 edit texts, and 2 spinners, and 1 imageView
+     * the first edittext is for the report Title which is a must for the report
+     * the second edit text is for the description which is only if you want to add extra information
+     * the first spinner is to choose a building, it first show the hint building "Choose a building", its a must to choose
+     * the second spinner is to choose areas based on the building that has been chosen.
+     * the imageview is not necessary, you can add image to the report, when pressing the imageview it will prompt
+     * if you want camera or gallery, based on the user choice it will ask for permissions and get the desired image,
+     * when pressing enter it will publish the report to firebase realtime database.
+     * @param view The view that triggers this method.
+     */
     public void addReport(View view) {
         if (!isFinishing()) {
             pd = ProgressDialog.show(ReportsActivity.this, "Opening add report dialog...", "", true);
@@ -375,7 +393,15 @@ public class ReportsActivity extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * @param requestCode The request code
+     * android.app.Activity, String[], int)}
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     * if permissions get accepted it will continue, if permissions get rejected twice, it will
+     * open a dialog asking you to add the permissions manually for the app.
+     *
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -489,17 +515,33 @@ public class ReportsActivity extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Opens the camera application to capture an image.
+     */
     public void openCamera(){
         Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(openCamera, OPEN_CAMERA_REQUEST);
 
     }
+
+    /**
+     * Opens the gallery application to select an image.
+     */
     public void openGallery(){
         Intent openGallery = new Intent(Intent.ACTION_PICK);
         openGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(openGallery, OPEN_GALLERY_REQUEST);
 
     }
+    /**
+     * Handles the result from activities like camera or gallery.
+     * also the camera and gallery opened from ReportsListAdapter are handled here
+     * and then sent back to the adapter.
+     * @param requestCode The request code of the activity result.
+     * @param resultCode The result code of the activity result.
+     * @param data The intent data returned by the activity.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -519,7 +561,7 @@ public class ReportsActivity extends AppCompatActivity {
         }
         else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST && resultCode == RESULT_OK && data != null){
             photo = (Bitmap) data.getExtras().get("data");
-            repListAdapter.handleActivityResult(requestCode, photo, data);
+            repListAdapter.handleActivityResult(photo, data);
             photo = null;
         }
         else if(requestCode ==OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST && data != null){
@@ -529,13 +571,19 @@ public class ReportsActivity extends AppCompatActivity {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            repListAdapter.handleActivityResult(requestCode, photo, data);
+            repListAdapter.handleActivityResult(photo, data);
             photo = null;
         }
         else {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
     }
+    /**
+     * Resizes a bitmap to fit within a specified maximum dimension and also reduce image size.
+     * @param original The original bitmap.
+     * @param maxDimension The maximum dimension for the resized bitmap.
+     * @return The resized bitmap.
+     */
     private Bitmap resizeBitmap(Bitmap original, int maxDimension) { // Resizing the bitmap so it will take less space (kb)
         int width = original.getWidth();
         int height = original.getHeight();
@@ -544,11 +592,18 @@ public class ReportsActivity extends AppCompatActivity {
         int newHeight = Math.round(scale * height);
         return Bitmap.createScaledBitmap(original, newWidth, newHeight, true);
     }
+    /**
+     * Disables the back button to prevent navigation without logging out.
+     */
     @Override
     public void onBackPressed() {
         // So you can't go back to register/log in without logging out
         //super.onBackPressed(); // Comment this out to disable the back button
     }
+    /**
+     * Sets up data fetching for the buildings.
+     * Fetches the list of buildings from the database and updates the UI.
+     */
     private void setupDataFetch() {
         refOrganizations.child("organizationBuildings").addListenerForSingleValueEvent(valueEventListenerBuilding = new ValueEventListener() {
             @Override
@@ -577,6 +632,12 @@ public class ReportsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Handles the options menu click events.
+     * only teachers, managers and admins can see the full options menu
+     * students and construction workers will only see "credits" and "logout"
+     * @param view The view that triggers this method.
+     */
     public void optionsMenuClicked(View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());

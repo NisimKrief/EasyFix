@@ -25,16 +25,35 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
+/**
+ * The adapter for displaying a list of waiting users.
+ * @author  Nisim Doron Krief
+ * @version	1.0
+ * @since	19/05/2024
+ * This adapter binds the data of waiting users to the views in the RecyclerView.
+ * It also handles the users with higher user level (10+) interactions for accepting or deleting users from the waiting list.
+ */
 public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersListAdapter.ViewHolder> {
 
     private ArrayList<User> Users;
     private Context context;
 
+    /**
+     * ViewHolder for the RecyclerView.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView waitingUsersTv, lastYearTv;
         private final CardView cardView;
+        /**
+         * The Containerll.
+         */
         LinearLayout containerll;
 
+        /**
+         * Constructs a new ViewHolder.
+         *
+         * @param view the view to hold
+         */
         public ViewHolder(View view) {
             super(view);
             waitingUsersTv = view.findViewById(R.id.waitingUsersTv);
@@ -43,11 +62,22 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
             containerll = view.findViewById(R.id.WcontainerLL);
         }
 
+        /**
+         * Gets the waiting users TextView.
+         *
+         * @return the waiting users TextView
+         */
         public TextView getTextView() {
             return waitingUsersTv;
         }
     }
 
+    /**
+     * Constructs a new WaitingUsersListAdapter.
+     *
+     * @param taskDataset the dataset of waiting users
+     * @param context     the context (WaitingUsersListActivity)
+     */
     public WaitingUsersListAdapter(ArrayList<User> taskDataset, Context context) {
         this.Users = taskDataset;
         this.context = context;
@@ -60,6 +90,20 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
         return new WaitingUsersListAdapter.ViewHolder(view);
     }
 
+    /**
+     * Binds the data of a waiting user to the view and sets up interaction handling.
+     * <p>
+     * This method arranges the waiting users list, displaying each user's name and grade level.
+     * When an item is clicked, it opens a popup menu with two options: accept or delete the user.
+     * <ul>
+     *     <li>If the user is accepted, they are moved from the "WaitingUsers" node to the "Users" node in the Firebase Realtime Database, allowing them to log in.</li>
+     *     <li>If the user is deleted, they are removed from the "WaitingUsers" node in the Firebase Realtime Database.</li>
+     * </ul>
+     * </p>
+     *
+     * @param viewHolder The ViewHolder which should be updated to represent the contents of the item at the given position in the data set.
+     * @param position   The position of the item within the adapter's data set.
+     */
     @Override
     public void onBindViewHolder(WaitingUsersListAdapter.ViewHolder viewHolder, final int position) {
         User user = Users.get(position);
@@ -125,6 +169,13 @@ public class WaitingUsersListAdapter extends RecyclerView.Adapter<WaitingUsersLi
     public int getItemCount() {
         return Users.size();
     }
+
+    /**
+     * Converts the last year integer to a string representation of the class.
+     *
+     * @param lastYear the last year of the user (The year he finished school)
+     * @return the string representation of the class
+     */
     public String switchLastYear(int lastYear) {
         String className;
         switch (lastYear) {

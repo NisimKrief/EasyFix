@@ -2,7 +2,6 @@ package com.example.easyfix.Activites;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.easyfix.FBref.checkInternetConnection;
 import static com.example.easyfix.FBref.refOrganizations;
 import static com.example.easyfix.FBref.refUsers;
 import static com.example.easyfix.FBref.refWaitingUsers;
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.example.easyfix.Adapters.ArrayAdapterOrganization;
-import com.example.easyfix.Classes.Building;
 import com.example.easyfix.Classes.Organization;
 import com.example.easyfix.FBref;
 import com.example.easyfix.R;
@@ -44,30 +42,86 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+/**
+ * The Main activity (The first activity).
+ * @author  Nisim Doron Krief
+ * @version	1.0
+ * @since	08/02/2024
+ * Users can register by providing necessary details and selecting an organization and class.
+ * The registration process checks for existing usernames to avoid duplicates.
+ * If the "Remember Me" checkbox is checked, the user remains logged in across sessions.
+ * Organizations and classes are populated from a Firebase Realtime Database.
+ */
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private FirebaseAuth mAuth;
-    EditText eTUser, eTPass, eTPass2, eTFullName;
-    //String[] Mosad = {"נא לבחור מוסד: ", "הרב תחומי עמ'ל מקיף ז'", "מקיף א'", "מיקרוסופט" };
+    /**
+     * The EditText for the Email.
+     */
+    EditText eTUser,
+    /**
+     * The EditText for the password.
+     */
+    eTPass,
+    /**
+     * The EditText for confirming the password.
+     */
+    eTPass2,
+    /**
+     * The EditText for the full name.
+     */
+    eTFullName;
+    /**
+     * List of available organizations.
+     */
     ArrayList<Organization> Organizations = new ArrayList<Organization>();
 
+    /**
+     * Default message shown before picking an organization.
+     */
     String[] BeforePicking = {"קודם לבחור מוסד בבקשה"};
-    String[] Class = {"נא לבחור כיתה: ", "כיתה א'","כיתה ב'", "כיתה ג'", "כיתה ד'", "כיתה ה'", "כיתה ו'", "כיתה ז'", "כיתה ח'"
-    , "כיתה ט'", "כיתה י'", "כיתה יא'", "כיתה יב'", "כיתה יג'", "כיתה יד'" };
-    String[] WorkArea = {"נא לבחור אזור עבודה: ", "משרד", "כלכלה", "תכנות"};
+    /**
+     * Spinner for selecting an organization.
+     */
     Spinner spinMosad;
+    /**
+     * Spinner for selecting a class.
+     */
     Spinner spinClass;
-    String MosadSelected;
+    /**
+     * The Mosad id selected.
+     */
     int MosadIdSelected;
+    /**
+     * Selected organization keyID.
+     */
     String MosadStringId;
-    String ClassSelected;
+    /**
+     * Array adapter for organizations.
+     */
     ArrayAdapter<String> AdpMosad;
-    ArrayAdapter<String> AdpMosadWorkArea;
+    /**
+     * Calendar instance for date-related operations.
+     */
     Calendar calendar;
+    /**
+     * Checkbox for remembering the user.
+     */
     CheckBox rememberCheckBox;
+    /**
+     * SharedPreferences for storing the checkbox.
+     */
     SharedPreferences sP;
+    /**
+     * ProgressDialog for showing loading indicators.
+     */
     ProgressDialog pd;
 
-
+    /**
+     * Called when the app is opened.
+     * Checks if the user is already logged in and proceeds accordingly.
+     * if the user is logged in but still in waiting users (still not accepted)
+     * he will not proceed and be asked to wait till he get accepted.
+     */
     public void onStart() {
         super.onStart();
         FBref.checkInternetConnection(this);
@@ -121,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinClass = (Spinner) findViewById(R.id.spinnerRooms);
         rememberCheckBox = (CheckBox)findViewById(R.id.checkBox2);
         ArrayAdapter<String> adpBeforePicking = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, BeforePicking);
-        AdpMosadWorkArea = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, WorkArea);
         spinMosad.setOnItemSelectedListener(this);
         spinClass.setAdapter(adpBeforePicking);
         spinClass.setOnItemSelectedListener(this);
@@ -316,10 +369,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         reportsRef.child(String.valueOf(System.currentTimeMillis())).setValue(report); */
 
     }
+
+    /**
+     * Attempts to register a new user.
+     * Validates user input and checks for existing usernames.
+     * if user input is correct, should call "checkIfUserNameExists" method to check if there's a user with the same username
+     *
+     * @param view The view that was clicked.
+     */
     public void Register(View view) {
         pd = ProgressDialog.show(this, "Trying to register...", "", true);
         int checkFields = checkFields(); // the count is how many fields are missing, will only proceed if all fields are filled.
-        // if spinClass.getSelectemItem == קודם לבחור מוסד בבקשה it means its a not updated organization. (organization without classOrWorkArea
+        // if spinClass.getSelectemItem == "קודם לבחור מוסד בבקשה" it means its a not updated organization. (organization without classOrWorkArea
         if (checkFields == 0 &&eTPass.getText().toString().equals(eTPass2.getText().toString()) && spinMosad.getSelectedItemPosition() != 0 && !spinClass.getSelectedItem().equals("קודם לבחור מוסד בבקשה")) {
             //if all fields are filled, it should check if there's a user registered with this name already, if there's he should change his username
             //but if there isn't let him proceed to the registering.
@@ -336,6 +397,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     }
+
+    /**
+     * Proceeds with the user registration process after validating user input.
+     * Creates a new user account with the provided email and password using Firebase Authentication.
+     * If the registration is successful, adds the user to 'WaitingUsers' node in the Firebase Realtime Database
+     * Displays appropriate messages and handles errors accordingly.
+     */
     public void registerProceed(){
         String Email = eTUser.getText().toString();
         String Password = eTPass.getText().toString();
@@ -348,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             String uId = fUser.getUid();
                             User user = new User(MosadStringId, uId, eTFullName.getText().toString().trim(), calculateLastYear((String) spinClass.getSelectedItem()));
                             if (user.getUserName().equals("AdminNisimDoronKrief")) {
+                                //adding an admin properties for faster registering and accepting users when new organization is created.
                                 user.setUserLevel(10000);
                                 refUsers.child(user.getKeyId()).child(uId).setValue(user);
                             } else {
@@ -370,13 +439,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                 });
     }
-
+    /**
+     * Handles the item selection event for spinners.
+     * Updates the available classes based on the selected organization.
+     *
+     * @param parent The AdapterView where the selection happened.
+     * @param view The view within the AdapterView that was clicked.
+     * @param position The position of the view in the adapter.
+     * @param id The row id of the item that is selected.
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if(parent.getId() == R.id.spinner) { // אם משתמשים בספינר של מוסד
             if (position != 0) {
                 Organization selectedOrg = Organizations.get(position);
-                MosadSelected = selectedOrg.getOrganizationName();
                 MosadStringId = String.valueOf(selectedOrg.getKeyId());
                 if(selectedOrg.getClassesOrWorkArea() != null) {
                     AdpMosad = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, selectedOrg.getClassesOrWorkArea());
@@ -394,9 +470,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
+    /**
+     * Log in screen.
+     *
+     * @param view the view
+     */
     public void LogInScreen(View view) {
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
     }
+
+    /**
+     * Validates user input fields to ensure they are not empty.
+     *
+     * @return The count of empty fields.
+     */
     public int checkFields(){
         int count = 0;
         if(eTUser.getText().toString().isEmpty()){
@@ -417,7 +504,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         return count;
     }
-    // Method to get the last year based on the current class
+
+    /**
+     * Calculates the last year of schooling based on the current class.
+     * that the user chose from the spinner
+     *
+     * @param currentClass The current class of the user.
+     * @return The last year of schooling.
+     * @throws IllegalArgumentException If the class name is invalid.
+     */
+// Method to get the last year based on the current class
     public int calculateLastYear(String currentClass) {
         // Map classes to their corresponding grade levels
         Map<String, Integer> classToGradeMap = new HashMap<>();
@@ -451,10 +547,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             throw new IllegalArgumentException("Invalid class name: " + currentClass);
         }
     }
+    /**
+     * Called when the back button is pressed.
+     * Overrides the default behavior to prevent navigating back after logging out.
+     */
     public void onBackPressed() {
         // So you can't go back after logging out, which may crash the application
         //super.onBackPressed(); // Comment this out to disable the back button
     }
+
+    /**
+     * checks for existing usernames in the organization, if there's user with the same username (in waiting users and current users), will make a toast and set an error
+     * if there isn't a user with the same username, will continue and call "registerProceed" method to continue the registration
+     */
     public void checkIfUserNameExists(){
         Query queryUsers = refUsers.child(MosadStringId).orderByChild("userName").equalTo(eTFullName.getText().toString().trim());
         Query queryWaitingUsers = refWaitingUsers.child(MosadStringId).orderByChild("userName").equalTo(eTFullName.getText().toString().trim());
