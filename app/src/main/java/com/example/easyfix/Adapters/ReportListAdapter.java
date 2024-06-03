@@ -3,6 +3,7 @@ package com.example.easyfix.Adapters;
 import static android.app.Activity.RESULT_OK;
 import static com.example.easyfix.FBref.currentUser;
 import static com.example.easyfix.FBref.refReports;
+import static com.example.easyfix.FBref.refReportsDeleted;
 import static com.example.easyfix.FBref.refReportsDone;
 import static com.example.easyfix.FBref.refUsers;
 import static java.lang.Long.parseLong;
@@ -356,6 +357,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                             @Override
                             public void onSuccess(Void unused) {
                                 Toast.makeText(context, "Report '" + currentReport.getReportMainType() + "' removed successfully", Toast.LENGTH_SHORT).show();
+                                refReportsDeleted.child(currentReport.getTimeReported()).setValue(currentReport);
                                 alertDialog.dismiss();
                             }
                         }).addOnFailureListener(new OnFailureListener() {

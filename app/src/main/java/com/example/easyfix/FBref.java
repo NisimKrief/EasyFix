@@ -18,6 +18,7 @@ public class FBref {
     public static DatabaseReference refWaitingUsers = FBDB.getReference("WaitingUsers");
     public static DatabaseReference refReports = FBDB.getReference("Reports");
     public static DatabaseReference refReportsDone = FBDB.getReference("ReportsDone");
+    public static DatabaseReference refReportsDeleted = FBDB.getReference("ReportsDeleted");
     public static User currentUser; // I use the user a big amount of times so I prefer to save it manually.
 
     private static AlertDialog alertDialog;
@@ -28,6 +29,7 @@ public class FBref {
         refWaitingUsers = refWaitingUsers.child(currentUser.getKeyId());
         refReports = refReports.child(currentUser.getKeyId());
         refReportsDone = refReportsDone.child(currentUser.getKeyId());
+        refReportsDeleted = refReportsDeleted.child(currentUser.getKeyId());
     }
     public void loggedOut(){ //.When user logs out, update the firebase references so he will not log in to the previous organization.
         refOrganizations = FBDB.getReference("Organizations");
@@ -35,6 +37,7 @@ public class FBref {
         refWaitingUsers = FBDB.getReference("WaitingUsers");
         refReports = FBDB.getReference("Reports");
         refReportsDone = FBDB.getReference("ReportsDone");
+        refReportsDeleted = FBDB.getReference("ReportsDone");
         currentUser = null;
     }
     public static void checkInternetConnection(Context context) {
