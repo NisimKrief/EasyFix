@@ -349,41 +349,60 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      *
      * @param currentClass The current class of the user.
      * @return The last year of schooling.
-     * @throws IllegalArgumentException If the class name is invalid.
      */
 // Method to get the last year based on the current class
     public int calculateLastYear(String currentClass) {
-        // Map classes to their corresponding grade levels
-        Map<String, Integer> classToGradeMap = new HashMap<>();
-        classToGradeMap.put("כיתה א'", 1);
-        classToGradeMap.put("כיתה ב'", 2);
-        classToGradeMap.put("כיתה ג'", 3);
-        classToGradeMap.put("כיתה ד'", 4);
-        classToGradeMap.put("כיתה ה'", 5);
-        classToGradeMap.put("כיתה ו'", 6);
-        classToGradeMap.put("כיתה ז'", 7);
-        classToGradeMap.put("כיתה ח'", 8);
-        classToGradeMap.put("כיתה ט'", 9);
-        classToGradeMap.put("כיתה י'", 10);
-        classToGradeMap.put("כיתה יא'", 11);
-        classToGradeMap.put("כיתה יב'", 12);
+        int gradeLevel;
 
-        // Get the current year
+        switch (currentClass) {
+            case "כיתה א'":
+                gradeLevel = 1;
+                break;
+            case "כיתה ב'":
+                gradeLevel = 2;
+                break;
+            case "כיתה ג'":
+                gradeLevel = 3;
+                break;
+            case "כיתה ד'":
+                gradeLevel = 4;
+                break;
+            case "כיתה ה'":
+                gradeLevel = 5;
+                break;
+            case "כיתה ו'":
+                gradeLevel = 6;
+                break;
+            case "כיתה ז'":
+                gradeLevel = 7;
+                break;
+            case "כיתה ח'":
+                gradeLevel = 8;
+                break;
+            case "כיתה ט'":
+                gradeLevel = 9;
+                break;
+            case "כיתה י'":
+                gradeLevel = 10;
+                break;
+            case "כיתה יא'":
+                gradeLevel = 11;
+                break;
+            case "כיתה יב'":
+                gradeLevel = 12;
+                break;
+            default:
+        }
+                // Handle cases where the class name is not in cases
+                // can add more cases based on the organizations.
+                gradeLevel = 12; // Or any value to indicate an invalid class
         Calendar calendar = Calendar.getInstance();
         int currentYear = calendar.get(Calendar.YEAR);
-
-        // Get the grade level of the current class
-        Integer gradeLevel = classToGradeMap.get(currentClass);
-
-        if (gradeLevel != null) {
-            // Calculate the remaining years to complete 12 years of schooling
+        // Calculate the remaining years to complete 12 years of schooling
             int remainingYears = 12 - gradeLevel;
             // Calculate the last year
             return currentYear + remainingYears;
-        } else {
-            //the case where the class is not found in the map
-            throw new IllegalArgumentException("Invalid class name: " + currentClass);
-        }
+
     }
     /**
      * Called when the back button is pressed.
