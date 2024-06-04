@@ -4,6 +4,8 @@
     </item>
     <item android:id="@+id/waitingUsersOption" android:title="Waiting Users">
     </item>
+    <item android:id="@+id/addOrganizationOption" android:title="Add Organizations">
+    </item>
     <item android:id="@+id/creditsOption" android:title="Credits">
     </item>
     <item android:id="@+id/logOutOption" android:title="Log out">

@@ -641,6 +641,10 @@ public class ReportsActivity extends AppCompatActivity {
     public void optionsMenuClicked(View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
+        if(currentUser.getUserLevel() < 10000){
+            //only admin should see that option
+            popupMenu.getMenu().findItem(R.id.addOrganizationOption).setVisible(false);
+        }
         if (currentUser.getUserLevel() < 10 || currentUser.getUserLevel() == 100) {
             //if its a regular user or a construction worker he shouldn't see all the screens.
             popupMenu.getMenu().findItem(R.id.manageUsersOption).setVisible(false);
@@ -656,6 +660,10 @@ public class ReportsActivity extends AppCompatActivity {
                 }
                 if (id == R.id.waitingUsersOption) {
                     startActivity(new Intent(ReportsActivity.this, WaitingUsersListActivity.class));
+                    return true;
+                }
+                if(id == R.id.addOrganizationOption){
+                    startActivity(new Intent(ReportsActivity.this, addOrganizationForAdminActivity.class));
                     return true;
                 }
                 if (id == R.id.creditsOption) {

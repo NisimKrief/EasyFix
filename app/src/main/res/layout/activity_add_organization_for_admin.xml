@@ -1,0 +1,78 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".Activites.addOrganizationForAdminActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add organization"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etOrganizationName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Organization Name" />
+
+    <EditText
+        android:id="@+id/etKeyId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Key ID" />
+
+    <EditText
+        android:id="@+id/etClassesOrWorkArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Classes or Work Areas" />
+
+    <Button
+        android:id="@+id/btnNextClassOrWorkArea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="addClassOrWorkArea"
+        android:text="Next Class or Work Area" />
+
+    <EditText
+        android:id="@+id/etBuildingName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Building Name" />
+
+    <Button
+        android:id="@+id/btnNextBuilding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="nextBuilding"
+        android:text="Next Building" />
+
+    <EditText
+        android:id="@+id/etAreas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Areas" />
+
+    <Button
+        android:id="@+id/btnNextArea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="nextArea"
+        android:text="Next Area" />
+
+    <Button
+        android:id="@+id/btnCreateOrganization"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="createOrganization"
+        android:text="Create Organization"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

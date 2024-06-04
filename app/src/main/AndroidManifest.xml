@@ -24,9 +24,11 @@
         android:theme="@style/Theme.EasyFix"
         tools:targetApi="31">
         <activity
+            android:name=".Activites.addOrganizationForAdminActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activites.creditsActivity"
             android:exported="false" />
-
         <activity
             android:name=".Activites.ManageUsersListActivity"
             android:exported="false"
