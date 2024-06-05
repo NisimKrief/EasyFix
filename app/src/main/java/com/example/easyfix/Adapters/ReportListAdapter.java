@@ -59,7 +59,7 @@ import java.util.Date;
 /**
  * The Array Adapter for Reports
  * @author  Nisim Doron Krief
- * @version	1.0
+ * @version	1.1
  * @since	23/04/2024
  * Responsible for displaying and managing the list of reports in a RecyclerView.
  * Provides functionalities to update, delete, work on reports, add fixed image, and finish reports.
