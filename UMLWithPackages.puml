@@ -1,0 +1,204 @@
+@startuml
+class com.example.easyfix.Adapters.WaitingUsersListAdapter {
+- ArrayList<User> Users
+- Context context
+}
+
+class com.example.easyfix.Adapters.WaitingUsersListAdapter$ViewHolder {
+- TextView waitingUsersTv
+- CardView cardView
+~ LinearLayout containerll
+}
+
+class com.example.easyfix.Adapters.ArrayAdapterOrganization {
+- Context context
+- ArrayList<Organization> Organizations
+}
+
+class com.example.easyfix.Activites.LogInActivity {
+~ EditText eTUser
+- FirebaseAuth mAuth
+~ CheckBox rememberCheckBox
+~ boolean rememberChecked
+~ SharedPreferences sP
+~ String orgKey
+~ int userLevel
+~ ProgressDialog pd
+}
+
+class com.example.easyfix.Activites.MainActivity {
+- FirebaseAuth mAuth
+~ EditText eTUser
+~ ArrayList<Organization> Organizations
+~ String[] BeforePicking
+~ Spinner spinMosad
+~ Spinner spinClass
+~ int MosadIdSelected
+~ String MosadStringId
+~ ArrayAdapter<String> AdpMosad
+~ Calendar calendar
+~ CheckBox rememberCheckBox
+~ SharedPreferences sP
+~ ProgressDialog pd
+}
+
+class com.example.easyfix.Classes.User {
+- String KeyId
+- String uId
+- String userName
+- int LastYear
+- int UserLevel
+}
+
+class com.example.easyfix.Adapters.ReportListAdapter {
+- ArrayList<Report> Reports
+~ ArrayList<Building> Buildings
+- Context context
+~ Spinner urgencySpinner
+~ Button updateButton
+~ ImageView reportImageView
+~ TextView reportTitleTV
+- String[] urgencyLevels
+~ String urgency
+~ Bitmap photo
+- ProgressDialog progressDialog
++ {static} int OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST
++ {static} int OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST
+}
+
+class com.example.easyfix.Adapters.ReportListAdapter$ViewHolder {
+- TextView ReportNameTv
+- CardView cardView
+- ImageView urgencyIcon
+~ LinearLayout containerll
+}
+
+class com.example.easyfix.Activites.WaitingUsersListActivity {
+~ RecyclerView waitingUsersRv
+~ WaitingUsersListAdapter waitingUsersListAdapter
+~ ArrayList<User> Users
+~ int lastYear
+~ ProgressDialog pd
+~ Query sameLastYear
+~ SearchView searchWaitingUsers
+}
+
+class com.example.easyfix.FBref {
++ {static} FirebaseDatabase FBDB
++ {static} DatabaseReference refOrganizations
++ {static} DatabaseReference refUsers
++ {static} DatabaseReference refWaitingUsers
++ {static} DatabaseReference refReports
++ {static} DatabaseReference refReportsDone
++ {static} DatabaseReference refReportsDeleted
++ {static} User currentUser
+- {static} AlertDialog alertDialog
+}
+
+class com.example.easyfix.Activites.ManageUsersListActivity {
+~ RecyclerView UsersRv
+~ UsersListAdapter UsersListAdapter
+~ String UserUid
+~ ArrayList<User> Users
+~ int userLevel
+~ ProgressDialog pd
+~ Query higherUserLevel
+~ SearchView searchUsers
+}
+
+class com.example.easyfix.Classes.Building {
+- String buildingName
+- ArrayList<String> rooms
+}
+
+class com.example.easyfix.Adapters.ArrayAdapterBuilding {
+- Context context
+- ArrayList<Building> Buildings
+}
+
+class com.example.easyfix.Activites.creditsActivity {
+}
+class com.example.easyfix.Classes.Organization {
+- String OrganizationName
+- String KeyId
+- ArrayList<Building> OrganizationBuildings
+- ArrayList<String> classesOrWorkArea
+}
+
+class com.example.easyfix.Adapters.UsersListAdapter {
+- ArrayList<User> Users
+- Context context
+- int userLevel
+}
+
+class com.example.easyfix.Adapters.UsersListAdapter$ViewHolder {
+- TextView UsersTv
+- ImageView userIcon
+- CardView cardView
+~ LinearLayout containerll
+}
+
+class com.example.easyfix.Activites.ReportsActivity {
+~ ArrayList<Report> Reports
+~ ArrayList<Building> Buildings
+~ RecyclerView ReportRv
+~ ReportListAdapter repListAdapter
+~ SharedPreferences sP
+~ Spinner spinBuilding
+~ String UserUid
+~ ProgressDialog pd
+~ ValueEventListener valueEventListenerBuilding
+~ ImageView image
+~ String stringPhotoTime
+- StorageReference storageRef
+- StorageReference imageRef
+~ Bitmap photo
+~ Switch switchReportsShown
+~ Query queryUrgency
+~ FloatingActionButton addReportButton
++ {static} int OPEN_CAMERA_REQUEST
++ {static} int OPEN_GALLERY_REQUEST
+}
+
+class com.example.easyfix.Classes.Report {
+- String reporter
+- String ReportMainType
+- String UrgencyLevel
+- Integer MalfunctionArea
+- Integer MalfunctionRoom
+- String TimeReported
+- String ExtraInformation
+- String ReportPhoto
+- String MalfunctionFixer
+- String TimeFixed
+- String FixedPhoto
+}
+
+class com.example.easyfix.Activites.addOrganizationForAdminActivity {
+~ EditText orgName
+~ ArrayList<Building> buildings
+~ ArrayList<String> areas
+}
+
+
+
+com.example.easyfix.Adapters.Adapter <|-- com.example.easyfix.Adapters.WaitingUsersListAdapter
+com.example.easyfix.Adapters.WaitingUsersListAdapter +.. com.example.easyfix.Adapters.WaitingUsersListAdapter$ViewHolder
+com.example.easyfix.Adapters.ViewHolder <|-- com.example.easyfix.Adapters.WaitingUsersListAdapter$ViewHolder
+android.widget.BaseAdapter <|-- com.example.easyfix.Adapters.ArrayAdapterOrganization
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.LogInActivity
+com.example.easyfix.Activites.OnItemSelectedListener <|.. com.example.easyfix.Activites.MainActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.MainActivity
+com.example.easyfix.Adapters.Adapter <|-- com.example.easyfix.Adapters.ReportListAdapter
+com.example.easyfix.Adapters.ReportListAdapter +.. com.example.easyfix.Adapters.ReportListAdapter$ViewHolder
+com.example.easyfix.Adapters.ViewHolder <|-- com.example.easyfix.Adapters.ReportListAdapter$ViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.WaitingUsersListActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.ManageUsersListActivity
+android.widget.BaseAdapter <|-- com.example.easyfix.Adapters.ArrayAdapterBuilding
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.creditsActivity
+com.example.easyfix.Adapters.Adapter <|-- com.example.easyfix.Adapters.UsersListAdapter
+com.example.easyfix.Adapters.UsersListAdapter +.. com.example.easyfix.Adapters.UsersListAdapter$ViewHolder
+com.example.easyfix.Adapters.ViewHolder <|-- com.example.easyfix.Adapters.UsersListAdapter$ViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.ReportsActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.easyfix.Activites.addOrganizationForAdminActivity
+@enduml

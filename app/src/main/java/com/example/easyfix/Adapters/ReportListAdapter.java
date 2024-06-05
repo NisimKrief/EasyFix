@@ -31,6 +31,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -120,6 +121,8 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      * A progress dialog for displaying loading status.
      */
     private ProgressDialog progressDialog;
+    private ActivityResultLauncher<Intent> openCameraForFixedReportLauncher;
+    private ActivityResultLauncher<Intent> openGalleryForFixedReportLauncher;
     /**
      * Request code for opening camera to capture fixed report images.
      */
@@ -174,11 +177,16 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      * @param taskDataset the list of reports
      * @param buildings   the list of buildings
      * @param context     the context of the activity (ReportsActivity)
+     * @param openCameraForFixedReportLauncher The ActivityResultLauncher for opening the camera.
+     * @param openGalleryForFixedReportLauncher The ActivityResultLauncher for opening the gallery.
      */
-    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings, Context context) {
+    public ReportListAdapter(ArrayList<Report> taskDataset, ArrayList<Building> buildings, Context context, ActivityResultLauncher<Intent> openCameraForFixedReportLauncher, ActivityResultLauncher<Intent> openGalleryForFixedReportLauncher)
+    {
         this.Reports = taskDataset;
         Buildings = buildings;
         this.context = context;
+        this.openCameraForFixedReportLauncher = openCameraForFixedReportLauncher;
+        this.openGalleryForFixedReportLauncher = openGalleryForFixedReportLauncher;
     }
 
     @Override
@@ -595,7 +603,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
      */
     public void openCamera() {
         Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        ((Activity) context).startActivityForResult(openCamera, OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST);
+        openCameraForFixedReportLauncher.launch(openCamera);
     }
 
     /**
@@ -604,13 +612,13 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
     public void openGallery() {
         Intent openGallery = new Intent(Intent.ACTION_PICK);
         openGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        ((Activity) context).startActivityForResult(openGallery, OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST);
+        openGalleryForFixedReportLauncher.launch(openGallery);
     }
 
     /**
      * the activityForResult gets to "ReportsActivity" and by adressing the "Fixed_Report_Request" code
      * it gets back to here by doing repListAdapter.handleActivityResult() with the desired parameters
-     * like that I can get onActivityForResult for my adapter which is impossible to do.
+     * like that I can get activityForResult for my adapter.
      * Handles the result from an activity for capturing or selecting an image.
      *
      * @param photo       the captured photo

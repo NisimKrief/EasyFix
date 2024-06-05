@@ -33,6 +33,10 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -116,6 +120,11 @@ public class ReportsActivity extends AppCompatActivity {
     Query queryUrgency;
     /** FloatingActionButton for adding new reports. */
     FloatingActionButton addReportButton;
+
+    private ActivityResultLauncher<Intent> openCameraLauncher;
+    private ActivityResultLauncher<Intent> openGalleryLauncher;
+    private ActivityResultLauncher<Intent> openCameraForFixedReportLauncher;
+    private ActivityResultLauncher<Intent> openGalleryForFixedReportLauncher;
     /** Request code for opening camera. */
     public static final int OPEN_CAMERA_REQUEST = 10;
     /** Request code for opening gallery. */
@@ -138,7 +147,14 @@ public class ReportsActivity extends AppCompatActivity {
         switchReportsShown = (Switch) findViewById(R.id.switchReportType);
         ReportRv=findViewById(R.id.repListRv);
         addReportButton=findViewById(R.id.fab_add);
-        repListAdapter=new ReportListAdapter(Reports, Buildings, this);
+
+        // Register activity result launchers
+        openCameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), openCameraResultCallback);
+        openGalleryLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), openGalleryResultCallback);
+        openCameraForFixedReportLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), openCameraForFixedReportResultCallback);
+        openGalleryForFixedReportLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), openGalleryForFixedReportResultCallback);
+
+        repListAdapter=new ReportListAdapter(Reports, Buildings, this, openCameraForFixedReportLauncher, openGalleryForFixedReportLauncher);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         ReportRv.setLayoutManager(layoutManager);
         sP=getSharedPreferences("Remember",MODE_PRIVATE);
@@ -490,7 +506,7 @@ public class ReportsActivity extends AppCompatActivity {
         else if(requestCode == OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
-                repListAdapter.openCamera();
+                repListAdapter.openGallery();
             } else {
                 // Permission denied
                 boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -519,65 +535,77 @@ public class ReportsActivity extends AppCompatActivity {
     /**
      * Opens the camera application to capture an image.
      */
-    public void openCamera(){
+    public void openCamera() {
         Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(openCamera, OPEN_CAMERA_REQUEST);
-
+        openCameraLauncher.launch(openCamera);
     }
 
     /**
-     * Opens the gallery application to select an image.
+     * Opens the camera application to select an image.
      */
-    public void openGallery(){
+    public void openGallery() {
         Intent openGallery = new Intent(Intent.ACTION_PICK);
         openGallery.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(openGallery, OPEN_GALLERY_REQUEST);
-
+        openGalleryLauncher.launch(openGallery);
     }
     /**
-     * Handles the result from activities like camera or gallery.
-     * also the camera and gallery opened from ReportsListAdapter are handled here
-     * and then sent back to the adapter.
-     * @param requestCode The request code of the activity result.
-     * @param resultCode The result code of the activity result.
-     * @param data The intent data returned by the activity.
+     * Callback for handling the result from the camera.
      */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == OPEN_CAMERA_REQUEST)&& resultCode == RESULT_OK && data != null) {
-            photo = (Bitmap) data.getExtras().get("data");
+    private final ActivityResultCallback<ActivityResult> openCameraResultCallback = result -> {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            photo = (Bitmap) result.getData().getExtras().get("data");
             image.setImageBitmap(photo);
-
+        } else {
+            Toast.makeText(ReportsActivity.this, "No Image Captured", Toast.LENGTH_SHORT).show();
         }
-        else if (requestCode == OPEN_GALLERY_REQUEST && data != null) {
-            Uri selectedImage = data.getData();
+    };
+    /**
+     * Callback for handling the result from the gallery.
+     */
+    private final ActivityResultCallback<ActivityResult> openGalleryResultCallback = result -> {
+        if (result.getData() != null) {
+            Uri selectedImage = result.getData().getData();
             try {
                 photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
                 image.setImageBitmap(photo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
-        else if(requestCode == OPEN_CAMERA_FOR_FIXED_REPORT_REQUEST && resultCode == RESULT_OK && data != null){
-            photo = (Bitmap) data.getExtras().get("data");
-            repListAdapter.handleActivityResult(photo, data);
+    };
+    /**
+     * Callback for handling the result from the camera for a fixed report.
+     * and sending the results back to the adapter
+     */
+    private final ActivityResultCallback<ActivityResult> openCameraForFixedReportResultCallback = result -> {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            photo = (Bitmap) result.getData().getExtras().get("data");
+            repListAdapter.handleActivityResult(photo, result.getData());
             photo = null;
+        } else {
+            Toast.makeText(ReportsActivity.this, "No Image Captured", Toast.LENGTH_SHORT).show();
         }
-        else if(requestCode ==OPEN_GALLERY_FOR_FIXED_REPORT_REQUEST && data != null){
-            Uri selectedImage = data.getData();
+    };
+    /**
+     * Callback for handling the result from the gallery for a fixed report.
+     * and sending the results back to the adapter
+     */
+    private final ActivityResultCallback<ActivityResult> openGalleryForFixedReportResultCallback = result -> {
+        if (result.getData() != null) {
+            Uri selectedImage = result.getData().getData();
             try {
                 photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                repListAdapter.handleActivityResult(photo, result.getData());
+                photo = null;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            repListAdapter.handleActivityResult(photo, data);
-            photo = null;
-        }
-        else {
+        } else {
             Toast.makeText(ReportsActivity.this, "No Image Selected", Toast.LENGTH_SHORT).show();
         }
-    }
+    };
     /**
      * Resizes a bitmap to fit within a specified maximum dimension and also reduce image size.
      * @param original The original bitmap.

@@ -34,23 +34,6 @@ public class User {
     }
 
     /**
-     * Instantiates a new User with the specified details.
-     * for special users, barely used.
-     * @param keyId     the organization key ID
-     * @param uId       the user's unique ID
-     * @param userName  the user's name
-     * @param lastYear  the last year of school
-     * @param userLevel the user level
-     */
-    public User(String keyId, String uId, String userName, int lastYear, int userLevel) {
-        KeyId = keyId;
-        this.uId = uId;
-        this.userName = userName;
-        LastYear = lastYear;
-        UserLevel = userLevel;
-    }
-
-    /**
      * Instantiates a new User.
      */
     public User() {
