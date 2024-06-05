@@ -541,7 +541,7 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the camera application to select an image.
+     * Opens the gallery application to select an image.
      */
     public void openGallery() {
         Intent openGallery = new Intent(Intent.ACTION_PICK);
