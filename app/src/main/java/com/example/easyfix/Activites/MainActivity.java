@@ -315,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     public void LogInScreen(View view) {
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
+        finish();
     }
 
     /**

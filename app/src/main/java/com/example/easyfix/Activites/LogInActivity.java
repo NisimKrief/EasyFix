@@ -105,6 +105,7 @@ public class LogInActivity extends AppCompatActivity {
      */
     public void RegisterScreen(View view) {
         startActivity(new Intent(LogInActivity.this, MainActivity.class));
+        finish();
     }
 
     /**

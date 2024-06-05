@@ -149,7 +149,7 @@ public class ManageUsersListActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        //super.onBackPressed();
         finish();
     }
 
