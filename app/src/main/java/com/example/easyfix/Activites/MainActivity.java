@@ -393,10 +393,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 gradeLevel = 12;
                 break;
             default:
-        }
                 // Handle cases where the class name is not in cases
                 // can add more cases based on the organizations.
-                gradeLevel = 12; // Or any value to indicate an invalid class
+                // Or any value to indicate an invalid class
+                gradeLevel = 12;
+                break;
+        }
         Calendar calendar = Calendar.getInstance();
         int currentYear = calendar.get(Calendar.YEAR);
         // Calculate the remaining years to complete 12 years of schooling
