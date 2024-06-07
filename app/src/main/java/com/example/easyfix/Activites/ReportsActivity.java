@@ -374,17 +374,17 @@ public class ReportsActivity extends AppCompatActivity {
                         });
 
                     }
-
+                    String timeReported = String.valueOf(System.currentTimeMillis());
                     Report report = new Report(
                             currentUser.getUserName(), // reporter
                             reportTitle.getText().toString(), // reportMainType
                             spinBuilding.getSelectedItemPosition() - 1, // malfunctionArea the minus 1 is because there's the hint building
                             spinRooms.getSelectedItemPosition(), // malfunctionRoom
-                            String.valueOf(System.currentTimeMillis()), // timeReported (timestamp)
+                            timeReported, // timeReported (timestamp)
                             reportDescription.getText().toString(), // extraInformation
                             stringPhotoTime // reportPhoto, using that string to find the image
                     );
-                    refReports.child(String.valueOf(System.currentTimeMillis())).setValue(report).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    refReports.child(timeReported).setValue(report).addOnSuccessListener(new OnSuccessListener<Void>() {
 
                             @Override
                             public void onSuccess(Void unused) {
