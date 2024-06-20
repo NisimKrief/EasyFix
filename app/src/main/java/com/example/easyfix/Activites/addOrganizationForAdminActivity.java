@@ -74,9 +74,12 @@ public class addOrganizationForAdminActivity extends AppCompatActivity {
     public void nextBuilding(View view) {
         if(!areas.isEmpty()) {
             if(!buildName.getText().toString().isEmpty()) {
-                buildings.add(new Building(buildName.getText().toString(), areas));
+                System.out.println(areas);
+                buildings.add(new Building(buildName.getText().toString(), new ArrayList<>(areas)));
+                System.out.println(buildings.get(0).getRooms());
                 buildName.setText("");
                 areas.clear();
+                System.out.println(buildings.get(0).getRooms());
             }
             else{
                 Toast.makeText(this, "Add Building Name First", Toast.LENGTH_SHORT).show();
