@@ -262,6 +262,7 @@ public class ReportsActivity extends AppCompatActivity {
      * @param view The view that triggers this method.
      */
     public void addReport(View view) {
+        photo = null; // if user inserted photo before but chose to leave the report.
         if (!isFinishing()) {
             pd = ProgressDialog.show(ReportsActivity.this, "Opening add report dialog...", "", true);
         }
@@ -366,6 +367,8 @@ public class ReportsActivity extends AppCompatActivity {
                         UploadTask uploadTask = imageRef.putBytes(imageData);
                         uploadTask.addOnSuccessListener(taskSnapshot -> {
                             // Image uploaded successfully
+                            if (!isFinishing())
+                                pd.dismiss();
                             Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                         }).addOnFailureListener(e -> {
                             // Handle unsuccessful uploads
@@ -389,7 +392,7 @@ public class ReportsActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void unused) {
                             Toast.makeText(ReportsActivity.this, "Report uploaded successfully", Toast.LENGTH_SHORT).show();
-                            if (!isFinishing())
+                            if (!isFinishing() && photo == null)
                                 pd.dismiss();
                         }
                         }).addOnFailureListener(new OnFailureListener() {

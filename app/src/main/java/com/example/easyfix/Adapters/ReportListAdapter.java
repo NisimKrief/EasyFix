@@ -260,6 +260,7 @@ public class ReportListAdapter extends RecyclerView.Adapter<ReportListAdapter.Vi
                     alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
                 }
                 alertDialog.show();
+                photo = null; // if user inserted photo before but chose to leave the report.
                 progressDialog = ProgressDialog.show(context, "Loading " + currentReport.getReportMainType() + " Report...", "",true);
 
                 urgencySpinner = dialogView.findViewById(R.id.urgencySpinner);
