@@ -367,8 +367,6 @@ public class ReportsActivity extends AppCompatActivity {
                         UploadTask uploadTask = imageRef.putBytes(imageData);
                         uploadTask.addOnSuccessListener(taskSnapshot -> {
                             // Image uploaded successfully
-                            if (!isFinishing())
-                                pd.dismiss();
                             Toast.makeText(ReportsActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                         }).addOnFailureListener(e -> {
                             // Handle unsuccessful uploads
@@ -392,7 +390,7 @@ public class ReportsActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void unused) {
                             Toast.makeText(ReportsActivity.this, "Report uploaded successfully", Toast.LENGTH_SHORT).show();
-                            if (!isFinishing() && photo == null)
+                            if (!isFinishing())
                                 pd.dismiss();
                         }
                         }).addOnFailureListener(new OnFailureListener() {
